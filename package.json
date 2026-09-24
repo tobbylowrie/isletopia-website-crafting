@@ -4,6 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "postinstall": "node scripts/sync-textures.mjs",
+    "sync-textures": "node scripts/sync-textures.mjs",
     "dev": "vite",
     "build": "run-p type-check \"build-only {@}\" --",
     "preview": "vite preview",
@@ -11,6 +13,7 @@
     "type-check": "vue-tsc --build"
   },
   "dependencies": {
+    "minecraft-textures": "^26.3.0",
     "vue": "^3.5.42"
   },
   "devDependencies": {

@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      minecraft-textures:
+        specifier: ^26.3.0
+        version: 26.3.0
       vue:
         specifier: ^3.5.42
         version: 3.5.43(typescript@6.0.3)
@@ -628,6 +631,9 @@ packages:
   memorystream@0.3.1:
     resolution: {integrity: sha512-S3UwM3yj5mtUSEfP41UZmt/0SCoVYUcU1rkXv+BQ5Ig8ndL4sPoJNBUJERafdPb5jjHJGuMgytgKvKIf58XNBw==}
     engines: {node: '>= 0.10.0'}
+
+  minecraft-textures@26.3.0:
+    resolution: {integrity: sha512-6T8mutuOKbxxYKDdPyFK3hHr/kP65yFTw3ShXw//irDF9We3NrjwJTc0CbS5Nk31rRxyReMME9Kg9raQSNoXhA==}
 
   mrmime@2.0.1:
     resolution: {integrity: sha512-Y3wQdFg2Va6etvQ5I82yUhGdsKrcYox6p7FfL1LbK2J4V01F9TGlepTIhnK24t7koZibmg82KGglhA1XK5IsLQ==}
@@ -1432,6 +1438,8 @@ snapshots:
       '@jridgewell/sourcemap-codec': 1.6.0
 
   memorystream@0.3.1: {}
+
+  minecraft-textures@26.3.0: {}
 
   mrmime@2.0.1: {}
 

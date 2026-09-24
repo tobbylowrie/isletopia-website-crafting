@@ -37,3 +37,12 @@ __screenshots__/
 
 # Vite
 *.timestamp-*-*.mjs
+
+# 由 scripts/sync-textures.mjs 从 minecraft-textures 包同步生成，可随时再生
+/public/textures
+
+# 本地视觉验收截图
+/.visual-judge
+
+# ZCode 工具本地文件
+.zcode/
