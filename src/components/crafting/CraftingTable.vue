@@ -10,8 +10,6 @@ const props = defineProps<{
   recipe: unknown
   /** 相对 1x 贴图的缩放倍数，默认 2（显示 256x132） */
   scale?: number
-  /** 物品贴图 base（以物品目录结尾），可切换版本或自建源 */
-  iconBase?: string
   /** 按物品 id 覆盖图片 URL */
   icons?: Record<string, string>
   /** 按物品 id 覆盖显示名 */
@@ -59,7 +57,6 @@ function slotStyle(x: number, y: number) {
         class="ct-cell"
         :item="item"
         :scale="s"
-        :icon-base="iconBase"
         :icons="icons"
         :labels="labels"
         :style="gridStyle(i)"
@@ -68,7 +65,6 @@ function slotStyle(x: number, y: number) {
         class="ct-cell"
         :item="parsed.recipe.result"
         :scale="s"
-        :icon-base="iconBase"
         :icons="icons"
         :labels="labels"
         :style="slotStyle(RESULT_X, RESULT_Y)"

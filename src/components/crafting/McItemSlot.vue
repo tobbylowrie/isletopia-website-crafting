@@ -1,15 +1,13 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import type { RecipeSlot } from './types'
-import { DEFAULT_ICON_BASE, itemIconUrl, prettyLabel, stripNamespace } from './icons'
+import { itemIconUrl, prettyLabel, stripNamespace } from './icons'
 
 const props = defineProps<{
   /** 物品格数据，null 不渲染 */
   item: RecipeSlot | null
   /** 相对 1x 贴图的缩放倍数（物品原始 16x16） */
   scale?: number
-  /** 贴图 base（以物品目录结尾），可切换版本或自建源 */
-  iconBase?: string
   /** 按物品 id 覆盖图片 URL */
   icons?: Record<string, string>
   /** 按物品 id 覆盖显示名 */
@@ -18,25 +16,30 @@ const props = defineProps<{
 
 const s = computed(() => props.scale ?? 1)
 
+const url = ref<string>()
 const failed = ref(false)
+
+// 贴图 URL 按需异步解析；序列号防止快速切换物品时的竞态覆盖
+let requestSeq = 0
 watch(
-  () => props.item,
-  () => {
+  () => [props.item, props.icons] as const,
+  async ([item]) => {
     failed.value = false
+    const seq = ++requestSeq
+    if (!item || item.isTag) {
+      url.value = undefined
+      return
+    }
+    const override = props.icons?.[item.id] ?? props.icons?.[stripNamespace(item.id)]
+    if (override) {
+      url.value = override
+      return
+    }
+    const resolved = await itemIconUrl(item.id)
+    if (seq === requestSeq) url.value = resolved
   },
+  { immediate: true },
 )
-
-const shortId = computed(() => (props.item ? stripNamespace(props.item.id) : ''))
-
-const iconSrc = computed(() => {
-  const item = props.item
-  if (!item || item.isTag) return undefined
-  return (
-    props.icons?.[item.id] ??
-    props.icons?.[shortId.value] ??
-    itemIconUrl(item.id, props.iconBase ?? DEFAULT_ICON_BASE)
-  )
-})
 
 const label = computed(() => {
   const item = props.item
@@ -49,9 +52,9 @@ const label = computed(() => {
 <template>
   <div v-if="item" class="mc-item" :style="{ '--s': s }">
     <img
-      v-if="iconSrc && !failed"
+      v-if="url && !failed"
       class="mc-item-img"
-      :src="iconSrc"
+      :src="url"
       :alt="label"
       draggable="false"
       @error="failed = true"
