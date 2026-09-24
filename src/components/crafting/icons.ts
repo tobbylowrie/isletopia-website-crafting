@@ -1,30 +1,15 @@
 /**
  * 物品图标：来自 github.com/destruc7i0n/minecraft-textures（npm 包 minecraft-textures）。
- * 按 README 的 bundler 用法：@mc-textures 别名指向包内 dist/textures/assets，
- * import.meta.glob 让 Vite 管理全部 PNG（开发按需读取、构建时 hash 打包），
- * 贴图 URL 按需异步解析——渲染到哪个物品才解析哪张图，不经过 public/，零网络请求。
- * manifest 提供 id -> 贴图哈希文件名 与 官方英文物品名（readable）映射。
+ * 虚拟模块 virtual:mc-textures 由 vite.config.ts 的 mcTextures 插件生成：
+ *   - items: manifest 物品元数据（id / readable / texture 哈希文件名）
+ *   - urlLoaders: 哈希文件名 -> 异步解析 Vite 资产 URL
+ * 贴图按需异步加载，运行时零网络请求。MC 版本统一在 vite.config.ts 的 MC_VERSION。
  */
-import manifestRaw from 'minecraft-textures/manifest/1.21.4.json?raw'
-import urlLoaders from 'virtual:mc-texture-urls'
+import { items as manifestItems, urlLoaders } from 'virtual:mc-textures'
 
-interface ManifestItem {
-  id: string
-  readable: string
-  texture: string
-}
-
-const manifest = JSON.parse(manifestRaw) as { items: ManifestItem[] }
-
-/** 贴图哈希文件名 -> 异步加载其 URL；由 vite.config.ts 的 mcTextureUrls 插件按 manifest 生成 */
-const loaderByFile = new Map<string, () => Promise<string>>(
-  Object.entries(urlLoaders),
-)
-
-/** manifest 物品 id -> 贴图文件名（内容哈希） */
 const textureById = new Map<string, string>()
 const readableById = new Map<string, string>()
-for (const item of manifest.items) {
+for (const item of manifestItems) {
   textureById.set(item.id, item.texture)
   textureById.set(stripNamespace(item.id), item.texture)
   readableById.set(item.id, item.readable)
@@ -40,7 +25,7 @@ export function stripNamespace(id: string): string {
 /** 物品 id -> 贴图 URL（按需异步解析）；未知物品（如模组物品）返回 undefined，由组件显示占位 */
 export async function itemIconUrl(itemId: string): Promise<string | undefined> {
   const file = textureById.get(itemId) ?? textureById.get(stripNamespace(itemId))
-  const loader = file ? loaderByFile.get(file) : undefined
+  const loader = file ? urlLoaders[file] : undefined
   if (!loader) return undefined
   try {
     return await loader()

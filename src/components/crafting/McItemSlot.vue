@@ -2,6 +2,8 @@
 import { computed, ref, watch } from 'vue'
 import type { RecipeSlot } from './types'
 import { itemIconUrl, prettyLabel, stripNamespace } from './icons'
+import { prettyTagLabel, tagMembers } from './tags'
+import { useTagCycleIndex } from './useTagCycleIndex'
 
 const props = defineProps<{
   /** 物品格数据，null 不渲染 */
@@ -16,37 +18,61 @@ const props = defineProps<{
 
 const s = computed(() => props.scale ?? 1)
 
+// tag 成员列表与全局同步轮播索引
+const memberIds = computed(() => (props.item?.isTag ? (tagMembers(props.item.id) ?? []) : []))
+const cycleIndex = useTagCycleIndex(() => memberIds.value.length)
+
+// 当前实际展示的物品 id：普通物品为其本身，tag 物品为轮播到的成员（未知 tag 无成员）
+const displayId = computed(() => {
+  const item = props.item
+  if (!item) return undefined
+  if (!item.isTag) return item.id
+  const members = memberIds.value
+  if (members.length === 0) return undefined
+  return members[cycleIndex.value % members.length]
+})
+
+// 贴图按需异步解析；序列号防止快速切换物品时的竞态覆盖
 const url = ref<string>()
 const failed = ref(false)
-
-// 贴图 URL 按需异步解析；序列号防止快速切换物品时的竞态覆盖
-let requestSeq = 0
+let urlSeq = 0
 watch(
-  () => [props.item, props.icons] as const,
-  async ([item]) => {
+  () => [displayId.value, props.icons] as const,
+  async ([id]) => {
     failed.value = false
-    const seq = ++requestSeq
-    if (!item || item.isTag) {
+    const seq = ++urlSeq
+    if (!id) {
       url.value = undefined
       return
     }
-    const override = props.icons?.[item.id] ?? props.icons?.[stripNamespace(item.id)]
+    const override = props.icons?.[id] ?? props.icons?.[stripNamespace(id)]
     if (override) {
       url.value = override
       return
     }
-    const resolved = await itemIconUrl(item.id)
-    if (seq === requestSeq) url.value = resolved
+    const resolved = await itemIconUrl(id)
+    if (seq === urlSeq) url.value = resolved
   },
   { immediate: true },
 )
 
-const label = computed(() => {
+const tipName = computed(() => {
   const item = props.item
   if (!item) return ''
-  const pretty = props.labels?.[item.id] ?? prettyLabel(item.id)
-  return item.isTag ? `#${pretty}` : pretty
+  if (item.isTag) return `任意 ${prettyTagLabel(item.id)}`
+  return props.labels?.[item.id] ?? prettyLabel(item.id)
 })
+
+const tipId = computed(() => {
+  const item = props.item
+  if (!item) return ''
+  return item.isTag ? `#${item.id}` : item.id
+})
+
+const memberNames = computed(() =>
+  memberIds.value.slice(0, 8).map((id) => props.labels?.[id] ?? prettyLabel(id)),
+)
+const memberMore = computed(() => memberIds.value.length - memberNames.value.length)
 </script>
 
 <template>
@@ -55,15 +81,19 @@ const label = computed(() => {
       v-if="url && !failed"
       class="mc-item-img"
       :src="url"
-      :alt="label"
+      :alt="tipName"
       draggable="false"
       @error="failed = true"
     />
     <div v-else class="mc-item-unknown">{{ item.isTag ? '#' : '?' }}</div>
     <span v-if="item.count > 1" class="mc-item-count">{{ item.count }}</span>
     <div class="mc-item-tip">
-      <span class="mc-item-tip-name">{{ label }}</span>
-      <span class="mc-item-tip-id">{{ item.isTag ? `#${item.id}` : item.id }}</span>
+      <span class="mc-item-tip-name">{{ tipName }}</span>
+      <span class="mc-item-tip-id">{{ tipId }}</span>
+      <span
+        v-if="item.isTag && memberNames.length"
+        class="mc-item-tip-members"
+      >{{ memberNames.join('、') }}{{ memberMore > 0 ? ` 等 ${memberIds.length} 种` : '' }}</span>
     </div>
   </div>
 </template>
@@ -83,7 +113,7 @@ const label = computed(() => {
   user-select: none;
 }
 
-/* 加载失败 / tag / 未知物品：MC 缺失材质风格的棋盘占位 */
+/* 加载失败 / 未知 tag / 未知物品：MC 缺失材质风格的棋盘占位 */
 .mc-item-unknown {
   width: 100%;
   height: 100%;
@@ -142,5 +172,13 @@ const label = computed(() => {
 .mc-item-tip-id {
   color: #9a9a9a;
   font-size: calc(7px * var(--s));
+}
+
+.mc-item-tip-members {
+  max-width: calc(180px * var(--s));
+  color: #9a9a9a;
+  font-size: calc(7px * var(--s));
+  line-height: 1.6;
+  white-space: normal;
 }
 </style>

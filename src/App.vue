@@ -25,6 +25,16 @@ const SAMPLES: { name: string; label: string; data: VanillaRecipeJson }[] = [
     },
   },
   {
+    name: 'stick',
+    label: '木棍 · tag 原料',
+    data: {
+      type: 'minecraft:crafting_shaped',
+      pattern: ['P', 'P'],
+      key: { P: { tag: 'minecraft:planks' } },
+      result: { id: 'minecraft:stick', count: 4 },
+    },
+  },
+  {
     name: 'cake',
     label: '蛋糕 · 无序 9 格',
     data: {
