@@ -1,7 +1,15 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { RecipeCard, parseRecipe, recipeTitle } from './components/crafting'
-import type { RecipeKind, VanillaRecipeJson } from './components/crafting'
+import {
+  RecipeCard,
+  parseRecipe,
+  recipeTitle,
+  itemSearchNames,
+  tagMembers,
+  prettyTagLabel,
+  zhDisplayName,
+} from './components/crafting'
+import type { ParsedRecipe, RecipeKind, VanillaRecipeJson } from './components/crafting'
 import { VANILLA_RECIPES } from './data/vanilla-recipes'
 import { CUSTOM_RECIPES } from './data/custom-recipes'
 
@@ -41,6 +49,32 @@ const KIND_ORDER: Record<RecipeKind, number> = {
   smithing: 4,
 }
 
+/**
+ * 目录搜索索引：配方 id + 产物/原料的中文名、英文名、物品 id；
+ * tag 原料额外展开 tag id、英文名与全部成员物品名，实现按标签及标签成员搜索。
+ * 合成燃料组（cooking.fuel）仅作展示，不参与索引，避免燃料成员污染结果。
+ */
+function buildSearchText(id: string, parsedRecipe: ParsedRecipe): string {
+  const parts: string[] = [id, id.replace(/^minecraft:/, '')]
+  for (const [key, slot] of Object.entries(parsedRecipe.slots)) {
+    if (key === 'cooking.fuel') continue
+    parts.push(slot.id, slot.id.replace(/^minecraft:/, ''))
+    if (slot.nameKey) {
+      // 药水等带组件物品：键名本身可搜（如 strength），同时解析出中文显示名（如 滞留型力量药水）
+      parts.push(slot.nameKey)
+      const nameKeyText = zhDisplayName(slot.nameKey)
+      if (nameKeyText) parts.push(nameKeyText)
+    }
+    if (slot.isTag) {
+      parts.push(prettyTagLabel(slot.id))
+      for (const member of tagMembers(slot.id) ?? []) parts.push(itemSearchNames(member))
+    } else {
+      parts.push(itemSearchNames(slot.id))
+    }
+  }
+  return parts.join(' ').toLowerCase()
+}
+
 function toEntry(id: string, recipe: VanillaRecipeJson, custom = false): CatalogEntry {
   const parsed = parseRecipe(recipe)
   if (!parsed.ok) return { id, raw: recipe, kind: null, custom, title: '', searchText: id.toLowerCase() }
@@ -52,7 +86,7 @@ function toEntry(id: string, recipe: VanillaRecipeJson, custom = false): Catalog
     kind: parsedRecipe.kind,
     custom,
     title,
-    searchText: `${id} ${title}`.toLowerCase(),
+    searchText: buildSearchText(id, parsedRecipe),
   }
 }
 
@@ -178,23 +212,23 @@ onBeforeUnmount(() => {
           placeholder="搜索配方 id 或产物名（如 pickaxe、钻石剑）"
         />
         <div class="kind-chips">
-          <button
-            v-for="opt in KIND_LABELS"
-            :key="opt.kind"
-            :class="{ active: kindFilter === opt.kind, custom: opt.kind === 'custom' }"
-            @click="kindFilter = opt.kind"
-          >
-            {{ opt.label }}（{{ kindCounts[opt.kind] ?? 0 }}）
-          </button>
-          <button
-            v-if="favoriteIds.length"
-            class="catalog-clear"
-            :class="{ confirm: confirmClear }"
-            type="button"
-            @click="clearFavorites"
-          >
-            {{ confirmClear ? '再点一次确认清空' : '清空收藏' }}
-          </button>
+          <template v-for="opt in KIND_LABELS" :key="opt.kind">
+            <button
+              :class="{ active: kindFilter === opt.kind, custom: opt.kind === 'custom', favorites: opt.kind === 'favorites' }"
+              @click="kindFilter = opt.kind"
+            >
+              {{ opt.label }}（{{ kindCounts[opt.kind] ?? 0 }}）
+            </button>
+            <button
+              v-if="opt.kind === 'favorites' && favoriteIds.length"
+              class="catalog-clear"
+              :class="{ confirm: confirmClear }"
+              type="button"
+              @click="clearFavorites"
+            >
+              {{ confirmClear ? '再点一次确认清空' : '清空收藏' }}
+            </button>
+          </template>
         </div>
       </div>
       <p class="catalog-meta">显示 {{ visible.length }} / {{ filtered.length }} 个配方</p>
@@ -204,6 +238,7 @@ onBeforeUnmount(() => {
           :key="entry.id"
           :recipe="entry.raw"
           :favorite="favoriteSet.has(entry.id)"
+          :badge="entry.custom ? '服务器自定义' : undefined"
           @toggle-favorite="toggleFavorite(entry.id)"
         />
       </div>
@@ -239,11 +274,11 @@ onBeforeUnmount(() => {
   cursor: pointer;
 }
 
-.kind-chips button:not(.custom):hover {
+.kind-chips button:not(.custom):not(.favorites):hover {
   background: #7d7f92;
 }
 
-.kind-chips button:not(.custom).active {
+.kind-chips button:not(.custom):not(.favorites).active {
   background: #5a7fb0;
 }
 
@@ -258,6 +293,21 @@ onBeforeUnmount(() => {
 
 .kind-chips button.custom.active {
   background: #4a9a31;
+}
+
+/* 已收藏分类：MC 金色黄底，深色文字保证可读 */
+.kind-chips button.favorites {
+  background: #ffaa00;
+  color: #3f2c00;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.25);
+}
+
+.kind-chips button.favorites:hover {
+  background: #ffc02e;
+}
+
+.kind-chips button.favorites.active {
+  background: #e09b00;
 }
 
 /* 清空收藏：有收藏时显示在分类行末，两步确认后变红 */

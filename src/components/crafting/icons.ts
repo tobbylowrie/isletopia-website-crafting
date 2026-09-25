@@ -67,6 +67,14 @@ export function recipeTitle(recipe: ParsedRecipe): string {
   return recipe.label
 }
 
+/** 物品搜索名：官方中文名 + 英文名 + 无命名空间 id（空格拼接），供目录搜索索引使用 */
+export function itemSearchNames(itemId: string): string {
+  const name = stripNamespace(itemId)
+  return [zhItemName(itemId), readableById.get(itemId) ?? readableById.get(name), name]
+    .filter(Boolean)
+    .join(' ')
+}
+
 /** 物品显示名：优先官方简体中文（zh_cn 字典），未知中文回退 manifest 英文名，再退 ID 驼峰化 */
 export function prettyLabel(itemId: string): string {
   const zh = zhItemName(itemId)
