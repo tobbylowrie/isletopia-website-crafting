@@ -53,6 +53,7 @@ export type SlotKey =
   | 'crafting.9'
   | 'crafting.result'
   | 'cooking.ingredient'
+  | 'cooking.fuel'
   | 'cooking.result'
   | 'brewing.reagent'
   | 'brewing.input'

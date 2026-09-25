@@ -10,7 +10,7 @@ import type { RecipeSlot, SlotKey } from '../types'
  * 熔炉面板（移植自源项目 FurnacePreviewSurface）。
  * 四种烹饪变体（熔炼/高炉/烟熏/营火）共用此面板，标题随 containerKey
  * 显示对应容器名（熔炉/高炉/烟熏炉/营火），变体另由类型徽章区分。
- * 燃料槽为纯装饰（JSON 配方不含燃料，恒空）。
+ * 燃料槽展示合成燃料组轮播（#minecraft:fuel），营火烹饪不消耗燃料故无燃料槽。
  */
 const props = defineProps<{
   slots: Partial<Record<SlotKey, RecipeSlot>>
@@ -33,7 +33,7 @@ const label = computed(
           <FurnaceFire />
         </div>
 
-        <McSlotView inert disabled />
+        <McSlotView :item="slots['cooking.fuel'] ?? null" />
       </div>
 
       <div class="furnace-arrow">

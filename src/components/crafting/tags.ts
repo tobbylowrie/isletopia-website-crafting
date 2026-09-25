@@ -4,9 +4,14 @@
  * 数据源版本见文件名，与 vite.config.ts 的 MC_VERSION 保持一致。
  */
 import tagsRaw from '../../data/generated/vanilla-tags-26.3.json?raw'
+import fuelsRaw from '../../data/generated/vanilla-fuels-26.3.json?raw'
 import { stripNamespace } from './icons'
 
 const tags = JSON.parse(tagsRaw) as Record<string, string[]>
+
+// 26.3 原版燃料数据硬编码于游戏代码（无 #minecraft:fuel 物品 tag），
+// 由 scripts/generate-vanilla-fuels.mjs 组合官方 tag 与 Wiki 补充项生成合成燃料组
+tags['minecraft:fuel'] = JSON.parse(fuelsRaw) as string[]
 
 /** 解析 tag 的成员物品列表；未知 tag 返回 undefined */
 export function tagMembers(tagId: string): string[] | undefined {
