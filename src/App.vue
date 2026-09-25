@@ -3,20 +3,27 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { RecipeCard, parseRecipe, recipeTitle } from './components/crafting'
 import type { RecipeKind, VanillaRecipeJson } from './components/crafting'
 import { VANILLA_RECIPES } from './data/vanilla-recipes'
+import { CUSTOM_RECIPES } from './data/custom-recipes'
 
 /* ------- 原版配方目录（26.3 全量 2042 条） ------- */
+
+/** 筛选类别：'custom' 为内置自定义配方，其余为原版配方的面板种类 */
+type CatalogCategory = RecipeKind | 'all' | 'custom'
 
 interface CatalogEntry {
   id: string
   raw: VanillaRecipeJson
   kind: RecipeKind | null
+  /** 自定义配方（独立于原版分类展示） */
+  custom?: boolean
   title: string
   searchText: string
 }
 
 /** 面板种类 → 筛选按钮文案 */
-const KIND_LABELS: { kind: RecipeKind | 'all'; label: string }[] = [
+const KIND_LABELS: { kind: CatalogCategory; label: string }[] = [
   { kind: 'all', label: '全部' },
+  { kind: 'custom', label: '自定义配方' },
   { kind: 'crafting', label: '合成' },
   { kind: 'furnace', label: '熔炼' },
   { kind: 'brewing', label: '酿造' },
@@ -24,7 +31,7 @@ const KIND_LABELS: { kind: RecipeKind | 'all'; label: string }[] = [
   { kind: 'smithing', label: '锻造' },
 ]
 
-/** 目录排序：面板种类分区（解析失败的排最后），区内按注册 id 字典序 */
+/** 目录排序：自定义配方置顶，原版按面板种类分区（解析失败的排最后），区内按注册 id 字典序 */
 const KIND_ORDER: Record<RecipeKind, number> = {
   crafting: 0,
   furnace: 1,
@@ -33,32 +40,39 @@ const KIND_ORDER: Record<RecipeKind, number> = {
   smithing: 4,
 }
 
-/** 启动时全量解析一次，得到分区/标题/搜索文本；失败的条目仍保留（卡片内展示错误态） */
-const catalog: CatalogEntry[] = VANILLA_RECIPES.map(({ id, recipe }) => {
+function toEntry(id: string, recipe: VanillaRecipeJson, custom = false): CatalogEntry {
   const parsed = parseRecipe(recipe)
-  if (!parsed.ok) return { id, raw: recipe, kind: null, title: '', searchText: id.toLowerCase() }
+  if (!parsed.ok) return { id, raw: recipe, kind: null, custom, title: '', searchText: id.toLowerCase() }
   const { recipe: parsedRecipe } = parsed
   const title = recipeTitle(parsedRecipe)
   return {
     id,
     raw: recipe,
     kind: parsedRecipe.kind,
+    custom,
     title,
     searchText: `${id} ${title}`.toLowerCase(),
   }
-}).sort((a, b) => {
-  const orderA = a.kind === null ? Number.MAX_SAFE_INTEGER : KIND_ORDER[a.kind]
-  const orderB = b.kind === null ? Number.MAX_SAFE_INTEGER : KIND_ORDER[b.kind]
+}
+
+/** 启动时全量解析一次，得到分区/标题/搜索文本；失败的条目仍保留（卡片内展示错误态） */
+const catalog: CatalogEntry[] = [
+  ...CUSTOM_RECIPES.map(({ id, recipe }) => toEntry(id, recipe, true)),
+  ...VANILLA_RECIPES.map(({ id, recipe }) => toEntry(id, recipe)),
+].sort((a, b) => {
+  const orderA = a.custom ? -1 : a.kind === null ? Number.MAX_SAFE_INTEGER : KIND_ORDER[a.kind]
+  const orderB = b.custom ? -1 : b.kind === null ? Number.MAX_SAFE_INTEGER : KIND_ORDER[b.kind]
   return orderA - orderB || a.id.localeCompare(b.id)
 })
 
 const query = ref('')
-const kindFilter = ref<RecipeKind | 'all'>('all')
+const kindFilter = ref<CatalogCategory>('all')
 
 const kindCounts = computed(() => {
   const counts: Record<string, number> = { all: catalog.length }
   for (const entry of catalog) {
-    if (entry.kind) counts[entry.kind] = (counts[entry.kind] ?? 0) + 1
+    if (entry.custom) counts.custom = (counts.custom ?? 0) + 1
+    else if (entry.kind) counts[entry.kind] = (counts[entry.kind] ?? 0) + 1
   }
   return counts
 })
@@ -66,6 +80,7 @@ const kindCounts = computed(() => {
 const filtered = computed(() => {
   const q = query.value.trim().toLowerCase()
   return catalog.filter((entry) => {
+    if (kindFilter.value === 'custom') return !!entry.custom
     if (kindFilter.value !== 'all' && entry.kind !== kindFilter.value) return false
     return !q || entry.searchText.includes(q)
   })
@@ -109,7 +124,7 @@ onBeforeUnmount(() => scrollObserver?.disconnect())
           <button
             v-for="opt in KIND_LABELS"
             :key="opt.kind"
-            :class="{ active: kindFilter === opt.kind }"
+            :class="{ active: kindFilter === opt.kind, custom: opt.kind === 'custom' }"
             @click="kindFilter = opt.kind"
           >
             {{ opt.label }}（{{ kindCounts[opt.kind] ?? 0 }}）
@@ -149,12 +164,25 @@ onBeforeUnmount(() => scrollObserver?.disconnect())
   cursor: pointer;
 }
 
-.kind-chips button:hover {
+.kind-chips button:not(.custom):hover {
   background: #7d7f92;
 }
 
-.kind-chips button.active {
+.kind-chips button:not(.custom).active {
   background: #5a7fb0;
+}
+
+/* 自定义配方分类：各状态均为 Minecraft 品牌绿 */
+.kind-chips button.custom {
+  background: #3c8527;
+}
+
+.kind-chips button.custom:hover {
+  background: #4a9a31;
+}
+
+.kind-chips button.custom.active {
+  background: #4a9a31;
 }
 
 /* 配方目录网格（最小 320px 列、16px 间距、响应式列数） */

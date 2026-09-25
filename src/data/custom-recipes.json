@@ -1,0 +1,57 @@
+{
+  "custom/enchanted_golden_apple": {
+    "type": "minecraft:crafting_shapeless",
+    "ingredients": [
+      "minecraft:apple",
+      "minecraft:gold_block",
+      "minecraft:gold_block",
+      "minecraft:gold_block",
+      "minecraft:gold_block",
+      "minecraft:gold_block",
+      "minecraft:gold_block",
+      "minecraft:gold_block",
+      "minecraft:gold_block"
+    ],
+    "result": {
+      "id": "minecraft:enchanted_golden_apple"
+    }
+  },
+  "custom/saddle": {
+    "type": "minecraft:crafting_shapeless",
+    "ingredients": [
+      "minecraft:leather",
+      "minecraft:leather",
+      "minecraft:leather",
+      "minecraft:iron_ingot",
+      "minecraft:iron_ingot"
+    ],
+    "result": {
+      "id": "minecraft:saddle"
+    }
+  },
+  "custom/name_tag": {
+    "type": "minecraft:crafting_shapeless",
+    "ingredients": [
+      "minecraft:paper",
+      "minecraft:paper",
+      "minecraft:string"
+    ],
+    "result": {
+      "id": "minecraft:name_tag"
+    }
+  },
+  "custom/packed_ice": {
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+      "III",
+      "III",
+      "III"
+    ],
+    "key": {
+      "I": "minecraft:ice"
+    },
+    "result": {
+      "id": "minecraft:packed_ice"
+    }
+  }
+}
