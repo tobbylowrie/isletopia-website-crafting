@@ -103,6 +103,34 @@ const catalog: CatalogEntry[] = [
 const query = ref('')
 const kindFilter = ref<CatalogCategory>('all')
 
+/* ------- 排序 ------- */
+
+type SortMode = 'default' | 'title-asc' | 'title-desc' | 'id-asc' | 'id-desc'
+
+const SORT_OPTIONS: { value: SortMode; label: string }[] = [
+  { value: 'default', label: '默认（类型分区）' },
+  { value: 'title-asc', label: '名称拼音 A→Z' },
+  { value: 'title-desc', label: '名称拼音 Z→A' },
+  { value: 'id-asc', label: '注册 id A→Z' },
+  { value: 'id-desc', label: '注册 id Z→A' },
+]
+
+const sortMode = ref<SortMode>('default')
+
+/** 排序作用于全量目录，筛选在其结果上进行 */
+const sorted = computed(() => {
+  if (sortMode.value === 'default') return catalog
+  const byTitle = sortMode.value.startsWith('title')
+  const arr = [...catalog].sort((a, b) => {
+    // 解析失败的条目（无标题）恒排末尾
+    if (!a.title && b.title) return 1
+    if (a.title && !b.title) return -1
+    return byTitle ? a.title.localeCompare(b.title, 'zh-Hans-CN') : a.id.localeCompare(b.id)
+  })
+  if (sortMode.value.endsWith('-desc')) arr.reverse()
+  return arr
+})
+
 /* ------- 收藏（cookie 持久化） ------- */
 
 const FAVORITES_COOKIE = 'rc_favorites'
@@ -166,7 +194,7 @@ const kindCounts = computed(() => {
 
 const filtered = computed(() => {
   const q = query.value.trim().toLowerCase()
-  return catalog.filter((entry) => {
+  return sorted.value.filter((entry) => {
     if (kindFilter.value === 'custom') return !!entry.custom
     if (kindFilter.value === 'favorites') return favoriteSet.value.has(entry.id)
     if (kindFilter.value !== 'all' && entry.kind !== kindFilter.value) return false
@@ -177,7 +205,7 @@ const filtered = computed(() => {
 /** 增量渲染：2042 张卡片一次性挂载会明显卡顿，滚动到页尾按批追加 */
 const PAGE_SIZE = 60
 const visibleCount = ref(PAGE_SIZE)
-watch([query, kindFilter], () => {
+watch([query, kindFilter, sortMode], () => {
   visibleCount.value = PAGE_SIZE
 })
 const visible = computed(() => filtered.value.slice(0, visibleCount.value))
@@ -232,6 +260,14 @@ onBeforeUnmount(() => {
           </template>
         </div>
       </div>
+      <label class="catalog-sort">
+        排序
+        <select v-model="sortMode">
+          <option v-for="opt in SORT_OPTIONS" :key="opt.value" :value="opt.value">
+            {{ opt.label }}
+          </option>
+        </select>
+      </label>
       <p class="catalog-meta">显示 {{ visible.length }} / {{ filtered.length }} 个配方</p>
       <div class="catalog-grid">
         <RecipeCard
@@ -379,6 +415,30 @@ onBeforeUnmount(() => {
   flex-wrap: wrap;
   justify-content: center;
   gap: 8px;
+}
+
+/* 排序选择器 */
+.catalog-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: color-mix(in oklab, var(--rc-foreground) 75%, transparent);
+}
+
+.catalog-sort select {
+  padding: 6px 10px;
+  font-size: 13px;
+  color: var(--rc-foreground);
+  background: var(--rc-card);
+  border: 1px solid var(--rc-border);
+  border-radius: 4px;
+  outline: none;
+  cursor: pointer;
+}
+
+.catalog-sort select:focus {
+  border-color: var(--rc-primary);
 }
 
 .catalog-meta {
