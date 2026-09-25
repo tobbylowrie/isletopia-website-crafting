@@ -4,21 +4,18 @@ import type { RecipeSlot } from './types'
 import { itemIconUrl, prettyLabel, stripNamespace } from './icons'
 import { prettyTagLabel, tagMembers } from './tags'
 import { useTagCycleIndex } from './useTagCycleIndex'
+import ItemTooltip from './ItemTooltip.vue'
 
 const props = defineProps<{
   /** 物品格数据，null 不渲染 */
   item: RecipeSlot | null
-  /** 相对 1x 贴图的缩放倍数（物品原始 16x16） */
-  scale?: number
   /** 按物品 id 覆盖图片 URL */
   icons?: Record<string, string>
   /** 按物品 id 覆盖显示名 */
   labels?: Record<string, string>
 }>()
 
-const s = computed(() => props.scale ?? 1)
-
-// tag 成员列表与全局同步轮播索引
+// tag 成员列表与全局同步轮播索引（对应源项目 CyclingItemPreview + useTagCycleTick）
 const memberIds = computed(() => (props.item?.isTag ? (tagMembers(props.item.id) ?? []) : []))
 const cycleIndex = useTagCycleIndex(() => memberIds.value.length)
 
@@ -56,16 +53,24 @@ watch(
   { immediate: true },
 )
 
+// tooltip 内容：tag 轮播时跟随当前成员（与源项目目录页行为一致）
 const tipName = computed(() => {
   const item = props.item
   if (!item) return ''
-  if (item.isTag) return `任意 ${prettyTagLabel(item.id)}`
+  if (item.isTag) {
+    const current = displayId.value
+    return current
+      ? (props.labels?.[current] ?? prettyLabel(current))
+      : `任意 ${prettyTagLabel(item.id)}`
+  }
   return props.labels?.[item.id] ?? prettyLabel(item.id)
 })
 
-const tipId = computed(() => {
+const tipDescription = computed(() => {
   const item = props.item
   if (!item) return ''
+  // tag 轮播中展示当前成员 id；静止（未知 tag）展示 tag id
+  if (item.isTag && displayId.value && displayId.value !== item.id) return displayId.value
   return item.isTag ? `#${item.id}` : item.id
 })
 
@@ -76,7 +81,7 @@ const memberMore = computed(() => memberIds.value.length - memberNames.value.len
 </script>
 
 <template>
-  <div v-if="item" class="mc-item" :style="{ '--s': s }">
+  <ItemTooltip v-if="item" class="mc-item" :title="tipName" :description="tipDescription">
     <img
       v-if="url && !failed"
       class="mc-item-img"
@@ -85,35 +90,32 @@ const memberMore = computed(() => memberIds.value.length - memberNames.value.len
       draggable="false"
       @error="failed = true"
     />
+    <!-- 加载失败 / 未知 tag / 未知物品：MC 缺失材质风格的棋盘占位 -->
     <div v-else class="mc-item-unknown">{{ item.isTag ? '#' : '?' }}</div>
     <span v-if="item.count > 1" class="mc-item-count">{{ item.count }}</span>
-    <div class="mc-item-tip">
-      <span class="mc-item-tip-name">{{ tipName }}</span>
-      <span class="mc-item-tip-id">{{ tipId }}</span>
-      <span
-        v-if="item.isTag && memberNames.length"
-        class="mc-item-tip-members"
-      >{{ memberNames.join('、') }}{{ memberMore > 0 ? ` 等 ${memberIds.length} 种` : '' }}</span>
-    </div>
-  </div>
+    <template v-if="item.isTag && memberNames.length" #extra>
+      <div class="mc-item-members">
+        {{ memberNames.join('、') }}{{ memberMore > 0 ? ` 等 ${memberIds.length} 种` : '' }}
+      </div>
+    </template>
+  </ItemTooltip>
 </template>
 
 <style scoped>
 .mc-item {
-  --s: 1;
-  position: relative;
-  width: calc(16px * var(--s));
-  height: calc(16px * var(--s));
+  width: 32px;
+  height: 32px;
 }
 
 .mc-item-img {
+  display: block;
   width: 100%;
   height: 100%;
   image-rendering: pixelated;
   user-select: none;
+  -webkit-touch-callout: none;
 }
 
-/* 加载失败 / 未知 tag / 未知物品：MC 缺失材质风格的棋盘占位 */
 .mc-item-unknown {
   width: 100%;
   height: 100%;
@@ -121,64 +123,41 @@ const memberMore = computed(() => memberIds.value.length - memberNames.value.len
   align-items: center;
   justify-content: center;
   color: #fff;
-  font-size: calc(10px * var(--s));
+  font-size: 16px;
   font-weight: 700;
   background: conic-gradient(#f800f8 25%, #000 0 50%, #f800f8 0 75%, #000 0);
   background-size: 50% 50%;
   text-shadow: 1px 1px 0 #000;
+  user-select: none;
 }
 
-/* 数量角标：白色数字 + MC 式右下深色投影 */
+/* 数量角标：Minecraft 字体白色数字 + 右下深色投影（移植自源项目 item-count） */
 .mc-item-count {
   position: absolute;
-  right: calc(-1px * var(--s));
-  bottom: calc(-2px * var(--s));
-  color: #fff;
-  font-size: calc(8px * var(--s));
-  font-weight: 700;
+  right: 2px;
+  bottom: 2px;
+  display: block;
+  min-width: 10px;
+  text-align: right;
+  font-family: var(--font-minecraft);
+  font-size: 16px;
   line-height: 1;
-  text-shadow: calc(1px * var(--s)) calc(1px * var(--s)) 0 #3f3f3f;
-  pointer-events: none;
-}
-
-/* 悬停提示框：紫边黑底 */
-.mc-item-tip {
-  display: none;
-  position: absolute;
-  left: 50%;
-  bottom: calc(100% + 3px * var(--s));
-  transform: translateX(-50%);
-  z-index: 10;
-  flex-direction: column;
-  gap: calc(1px * var(--s));
-  padding: calc(3px * var(--s)) calc(4px * var(--s));
-  background: rgba(16, 0, 17, 0.94);
-  border: calc(1px * var(--s)) solid #2d0a63;
-  outline: calc(1px * var(--s)) solid #100011;
-  white-space: nowrap;
-  pointer-events: none;
-}
-
-.mc-item:hover .mc-item-tip {
-  display: flex;
-}
-
-.mc-item-tip-name {
   color: #fff;
-  font-size: calc(9px * var(--s));
-  font-weight: 700;
+  font-smooth: none;
+  -webkit-font-smoothing: none;
+  text-shadow: 2px 2px 0 #3f3f3f;
+  pointer-events: none;
+  user-select: none;
 }
 
-.mc-item-tip-id {
-  color: #9a9a9a;
-  font-size: calc(7px * var(--s));
-}
-
-.mc-item-tip-members {
-  max-width: calc(180px * var(--s));
-  color: #9a9a9a;
-  font-size: calc(7px * var(--s));
-  line-height: 1.6;
+/* tag 成员列表行：跟随在 tooltip 描述行之后，允许换行 */
+.mc-item-members {
+  max-width: 260px;
   white-space: normal;
+  font-size: 16px;
+  line-height: 1.25em;
+  color: #555555;
+  display: block;
+  margin-top: 2px;
 }
 </style>

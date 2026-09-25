@@ -1,3 +1,12 @@
+/* Minecraft 像素字体（文件移植自源项目 public/fonts/Minecraft.woff） */
+@font-face {
+  font-family: 'Minecraft';
+  src: url('./fonts/Minecraft.woff') format('woff');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -8,10 +17,49 @@ body {
   padding: 0;
 }
 
+:root {
+  /* Minecraft 字体回退链（移植自源项目 Tailwind 主题 --font-minecraft） */
+  --font-minecraft: 'Minecraft', 'Minecraftia', ui-monospace, 'SFMono-Regular', Menlo, Monaco,
+    Consolas, 'Liberation Mono', 'Courier New', monospace;
+
+  /*
+   * 目录卡片主题变量（移植自源项目 mist / emerald 色阶），默认亮色，.dark 覆盖。
+   * 数值与源项目 Tailwind 4.3 theme.css 一致。
+   */
+  --rc-background: #ffffff;
+  --rc-foreground: oklch(21.8% 0.008 223.9);
+  --rc-card: #ffffff;
+  --rc-border: oklch(87.2% 0.007 219.6);
+  --rc-primary: oklch(59.6% 0.145 163.225);
+  --rc-badge-border: color-mix(in oklab, var(--rc-primary) 35%, transparent);
+  --rc-badge-bg: color-mix(in oklab, var(--rc-primary) 10%, transparent);
+
+  /* MC 槽位配色（亮色）：--minecraft-slot-bg 为 HSL 三元组，供 hsl(var(...)) 使用 */
+  --minecraft-inventory-bg: 0 0% 77.65%;
+  --minecraft-slot-bg: 0 0% 54.51%;
+  --minecraft-slot-border-tl: #373737;
+  --minecraft-slot-border-br: #ffffff;
+}
+
+.dark {
+  --rc-background: oklch(14.8% 0.004 228.8);
+  --rc-foreground: oklch(96.3% 0.002 197.1);
+  --rc-card: oklch(21.8% 0.008 223.9);
+  --rc-border: color-mix(in oklab, oklch(37.8% 0.015 216) 55%, oklch(27.5% 0.011 216.9));
+  --rc-primary: oklch(69.6% 0.17 162.48);
+  --rc-badge-border: color-mix(in oklab, var(--rc-primary) 30%, transparent);
+  --rc-badge-bg: color-mix(in oklab, var(--rc-primary) 15%, transparent);
+
+  --minecraft-inventory-bg: 0 0% 20%;
+  --minecraft-slot-bg: 0 0% 14%;
+  --minecraft-slot-border-tl: #0a0a0a;
+  --minecraft-slot-border-br: #3a3a3a;
+}
+
 body {
   min-height: 100vh;
-  background: #2e2b28;
-  color: #e8e4de;
+  background: var(--rc-background);
+  color: var(--rc-foreground);
   font-family: 'Segoe UI', 'Microsoft YaHei', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }

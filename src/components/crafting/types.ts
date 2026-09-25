@@ -1,6 +1,6 @@
 /**
  * 原版 data pack 配方 JSON 的宽松类型。
- * 字段兼容 1.21 前后两种写法（result.id / result.item 等）。
+ * 字段兼容 1.21 前后两种写法（result.id / result.item、ingredient 字符串 / {id} / {item} 等）。
  */
 export interface VanillaRecipeJson {
   type?: string
@@ -10,7 +10,16 @@ export interface VanillaRecipeJson {
   key?: Record<string, unknown>
   /** crafting_shapeless 的原料列表 */
   ingredients?: unknown
-  result?: { id?: string; item?: string; count?: number }
+  /** 熔炼 / 切石类配方的单一原料 */
+  ingredient?: unknown
+  /** smithing 配方的三个输入槽 */
+  template?: unknown
+  base?: unknown
+  addition?: unknown
+  /** 产物（对象或字符串，stonecutter 支持字符串） */
+  result?: unknown
+  /** stonecutter 的产物数量位于配方根级 */
+  count?: number
   [field: string]: unknown
 }
 
@@ -19,15 +28,45 @@ export interface RecipeSlot {
   /** 物品或标签 id，如 "minecraft:diamond_sword"；tag 引用保留原 id */
   id: string
   count: number
-  /** 引用来自 tag（无具体图标，占位显示） */
+  /** 引用来自 tag（无具体图标，轮播展示成员） */
   isTag?: boolean
 }
 
-/** 归一化配方：9 格网格（行优先，左上对齐）+ 产物 */
+/** 配方种类，决定渲染使用的面板 */
+export type RecipeKind = 'crafting' | 'furnace' | 'stonecutter' | 'smithing'
+
+/**
+ * 统一槽位键（沿用源项目命名）。
+ * crafting 网格按 3x3 行优先编号，2x2 面板使用其中左上角的 1/2/4/5。
+ */
+export type SlotKey =
+  | 'crafting.1'
+  | 'crafting.2'
+  | 'crafting.3'
+  | 'crafting.4'
+  | 'crafting.5'
+  | 'crafting.6'
+  | 'crafting.7'
+  | 'crafting.8'
+  | 'crafting.9'
+  | 'crafting.result'
+  | 'cooking.ingredient'
+  | 'cooking.result'
+  | 'stonecutter.ingredient'
+  | 'stonecutter.result'
+  | 'smithing.template'
+  | 'smithing.base'
+  | 'smithing.addition'
+  | 'smithing.result'
+
+/** 归一化配方：统一槽位模型 */
 export interface ParsedRecipe {
-  kind: 'shaped' | 'shapeless'
-  grid: (RecipeSlot | null)[]
-  result: RecipeSlot
+  kind: RecipeKind
+  /** crafting 专用：shaped 图案 ≤2×2 时为 2，否则 3；shapeless 恒为 3 */
+  gridSize?: 2 | 3
+  /** 目录卡片类型徽章文案，如 "Crafting" / "Smelting" / "Smithing Transform" */
+  label: string
+  slots: Partial<Record<SlotKey, RecipeSlot>>
 }
 
 export type ParseResult =
