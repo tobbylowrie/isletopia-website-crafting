@@ -20,9 +20,13 @@ const props = withDefaults(
     recipe: unknown
     /** 整卡缩放倍数，>0 任意数值（演示页使用 1/2/4/8 整数档） */
     scale?: number
+    /** 是否已收藏（收藏状态由调用方持有，卡片仅展示与上报点击） */
+    favorite?: boolean
   }>(),
-  { scale: 1 },
+  { scale: 1, favorite: false },
 )
+
+const emit = defineEmits<{ (e: 'toggle-favorite'): void }>()
 
 const parsed = computed(() => parseRecipe(props.recipe))
 
@@ -64,6 +68,22 @@ const wrapperStyle = computed(() => {
       <article v-if="parsed.ok" class="rc-card">
         <div class="rc-head">
           <h2 class="rc-title">{{ title }}</h2>
+          <button
+            class="rc-fav"
+            :class="{ on: favorite }"
+            type="button"
+            :title="favorite ? '取消收藏' : '收藏'"
+            @click.stop="emit('toggle-favorite')"
+          >
+            <svg class="rc-fav-icon" viewBox="0 0 10 14" shape-rendering="crispEdges" aria-hidden="true">
+              <!-- 旗帜：矩形底部减去倒三角（缺口逐行收窄），形成双尾旗 -->
+              <path
+                fill="currentColor"
+                d="M0 0h10v10H0z M0 10h4v1H0z M6 10h4v1H6z M0 11h3v1H0z M7 11h3v1H7z M0 12h2v1H0z M8 12h2v1H8z M0 13h1v1H0z M9 13h1v1H9z"
+              />
+            </svg>
+            <span>{{ favorite ? '取消收藏' : '收藏' }}</span>
+          </button>
           <span class="rc-badge">{{ parsed.recipe.label }}</span>
         </div>
 
@@ -162,6 +182,42 @@ const wrapperStyle = computed(() => {
   line-height: 16px;
   font-weight: 600;
   user-select: none;
+}
+
+/* 收藏按钮：原版风格灰底 + 像素旗帜图标，收藏后旗帜变金色 */
+.rc-fav {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 7px;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  color: #fff;
+  text-shadow: 1px 1px 0 #3f3f3f;
+  background: #6f6b66;
+  border: 2px solid #000;
+  box-shadow:
+    inset 2px 2px 0 rgba(255, 255, 255, 0.35),
+    inset -2px -2px 0 rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  user-select: none;
+}
+
+.rc-fav:hover {
+  background: #7d7f92;
+}
+
+.rc-fav-icon {
+  width: 10px;
+  height: 14px;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.rc-fav.on .rc-fav-icon {
+  color: #ffaa00;
 }
 
 .rc-preview {

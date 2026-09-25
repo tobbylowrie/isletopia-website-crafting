@@ -7,8 +7,8 @@ import { CUSTOM_RECIPES } from './data/custom-recipes'
 
 /* ------- 原版配方目录（26.3 全量 2042 条） ------- */
 
-/** 筛选类别：'custom' 为内置自定义配方，其余为原版配方的面板种类 */
-type CatalogCategory = RecipeKind | 'all' | 'custom'
+/** 筛选类别：'custom' 为内置自定义配方，'favorites' 为收藏，其余为原版配方的面板种类 */
+type CatalogCategory = RecipeKind | 'all' | 'custom' | 'favorites'
 
 interface CatalogEntry {
   id: string
@@ -23,6 +23,7 @@ interface CatalogEntry {
 /** 面板种类 → 筛选按钮文案 */
 const KIND_LABELS: { kind: CatalogCategory; label: string }[] = [
   { kind: 'all', label: '全部' },
+  { kind: 'favorites', label: '已收藏' },
   { kind: 'custom', label: '自定义配方' },
   { kind: 'crafting', label: '合成' },
   { kind: 'furnace', label: '熔炼' },
@@ -68,11 +69,63 @@ const catalog: CatalogEntry[] = [
 const query = ref('')
 const kindFilter = ref<CatalogCategory>('all')
 
+/* ------- 收藏（cookie 持久化） ------- */
+
+const FAVORITES_COOKIE = 'rc_favorites'
+
+/** 从 cookie 读取收藏 id 列表；无 cookie 或内容损坏返回空数组 */
+function readFavoriteIds(): string[] {
+  const prefix = `${FAVORITES_COOKIE}=`
+  const raw = document.cookie
+    .split('; ')
+    .find((row) => row.startsWith(prefix))
+    ?.slice(prefix.length)
+  if (!raw) return []
+  try {
+    const list = JSON.parse(decodeURIComponent(raw))
+    return Array.isArray(list) ? list.filter((v): v is string => typeof v === 'string') : []
+  } catch {
+    return []
+  }
+}
+
+function writeFavoriteIds(ids: string[]) {
+  // 有效期一年；SameSite=Lax 满足纯本地浏览
+  document.cookie = `${FAVORITES_COOKIE}=${encodeURIComponent(JSON.stringify(ids))}; max-age=31536000; path=/; SameSite=Lax`
+}
+
+const favoriteIds = ref<string[]>(readFavoriteIds())
+const favoriteSet = computed(() => new Set(favoriteIds.value))
+
+function toggleFavorite(id: string) {
+  const next = favoriteIds.value.includes(id)
+    ? favoriteIds.value.filter((value) => value !== id)
+    : [...favoriteIds.value, id]
+  favoriteIds.value = next
+  writeFavoriteIds(next)
+}
+
+/** 清空收藏：两步确认，3 秒内未再次点击则复原 */
+const confirmClear = ref(false)
+let confirmTimer: ReturnType<typeof setTimeout> | undefined
+function clearFavorites() {
+  if (!confirmClear.value) {
+    confirmClear.value = true
+    confirmTimer = setTimeout(() => (confirmClear.value = false), 3000)
+    return
+  }
+  clearTimeout(confirmTimer)
+  confirmClear.value = false
+  favoriteIds.value = []
+  writeFavoriteIds([])
+}
+
 const kindCounts = computed(() => {
-  const counts: Record<string, number> = { all: catalog.length }
+  const counts: Record<string, number> = { all: catalog.length, favorites: 0 }
   for (const entry of catalog) {
     if (entry.custom) counts.custom = (counts.custom ?? 0) + 1
     else if (entry.kind) counts[entry.kind] = (counts[entry.kind] ?? 0) + 1
+    if (favoriteSet.value.has(entry.id)) counts.favorites = (counts.favorites ?? 0) + 1
   }
   return counts
 })
@@ -81,6 +134,7 @@ const filtered = computed(() => {
   const q = query.value.trim().toLowerCase()
   return catalog.filter((entry) => {
     if (kindFilter.value === 'custom') return !!entry.custom
+    if (kindFilter.value === 'favorites') return favoriteSet.value.has(entry.id)
     if (kindFilter.value !== 'all' && entry.kind !== kindFilter.value) return false
     return !q || entry.searchText.includes(q)
   })
@@ -107,7 +161,10 @@ onMounted(() => {
   )
   if (sentinel.value) scrollObserver.observe(sentinel.value)
 })
-onBeforeUnmount(() => scrollObserver?.disconnect())
+onBeforeUnmount(() => {
+  scrollObserver?.disconnect()
+  clearTimeout(confirmTimer)
+})
 </script>
 
 <template>
@@ -129,12 +186,30 @@ onBeforeUnmount(() => scrollObserver?.disconnect())
           >
             {{ opt.label }}（{{ kindCounts[opt.kind] ?? 0 }}）
           </button>
+          <button
+            v-if="favoriteIds.length"
+            class="catalog-clear"
+            :class="{ confirm: confirmClear }"
+            type="button"
+            @click="clearFavorites"
+          >
+            {{ confirmClear ? '再点一次确认清空' : '清空收藏' }}
+          </button>
         </div>
       </div>
       <p class="catalog-meta">显示 {{ visible.length }} / {{ filtered.length }} 个配方</p>
       <div class="catalog-grid">
-        <RecipeCard v-for="entry in visible" :key="entry.id" :recipe="entry.raw" />
+        <RecipeCard
+          v-for="entry in visible"
+          :key="entry.id"
+          :recipe="entry.raw"
+          :favorite="favoriteSet.has(entry.id)"
+          @toggle-favorite="toggleFavorite(entry.id)"
+        />
       </div>
+      <p v-if="kindFilter === 'favorites' && filtered.length === 0" class="catalog-meta">
+        还没有收藏配方，点击卡片右上角的旗帜按钮即可收藏
+      </p>
       <div ref="sentinel" class="catalog-sentinel" aria-hidden="true"></div>
       <p v-if="visible.length < filtered.length" class="catalog-meta">继续滚动加载更多…</p>
     </section>
@@ -183,6 +258,24 @@ onBeforeUnmount(() => scrollObserver?.disconnect())
 
 .kind-chips button.custom.active {
   background: #4a9a31;
+}
+
+/* 清空收藏：有收藏时显示在分类行末，两步确认后变红 */
+.catalog-clear {
+  padding: 7px 12px;
+  font-size: 13px;
+  color: #fff;
+  text-shadow: 1px 1px 0 #3f3f3f;
+  background: #6f6b66;
+  border: 2px solid #000;
+  box-shadow:
+    inset 2px 2px 0 rgba(255, 255, 255, 0.35),
+    inset -2px -2px 0 rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+}
+
+.catalog-clear.confirm {
+  background: #a33b3b;
 }
 
 /* 配方目录网格（最小 320px 列、16px 间距、响应式列数） */
