@@ -2,6 +2,7 @@
 import CardFrame from '../CardFrame.vue'
 import McUiLabel from '../McUiLabel.vue'
 import McSlotView from '../McSlotView.vue'
+import { zhLangText } from '../lang'
 import { StonecutterScrollerUi, StonecutterSelectionUi } from '../mcUiArt'
 import type { RecipeSlot, SlotKey } from '../types'
 
@@ -12,12 +13,14 @@ import type { RecipeSlot, SlotKey } from '../types'
 defineProps<{
   slots: Partial<Record<SlotKey, RecipeSlot>>
 }>()
+
+const label = zhLangText('container.stonecutter') ?? 'Stonecutter'
 </script>
 
 <template>
   <CardFrame align="start" :preferred-width="352" :min-width="336">
     <div class="stonecutter-canvas">
-      <McUiLabel>Stonecutter</McUiLabel>
+      <McUiLabel>{{ label }}</McUiLabel>
 
       <div class="stonecutter-selection">
         <StonecutterSelectionUi />

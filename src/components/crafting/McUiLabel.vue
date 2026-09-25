@@ -17,7 +17,7 @@ defineProps<{
 .mc-ui-label {
   font-family: var(--font-minecraft);
   pointer-events: none;
-  font-size: 20px;
+  font-size: 16px;
   line-height: 18px;
   white-space: nowrap;
   color: #404040;

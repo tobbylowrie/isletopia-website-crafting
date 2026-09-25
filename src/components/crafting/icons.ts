@@ -6,6 +6,7 @@
  * 贴图按需异步加载，运行时零网络请求。MC 版本统一在 vite.config.ts 的 MC_VERSION。
  */
 import { items as manifestItems, urlLoaders } from 'virtual:mc-textures'
+import { zhItemName } from './lang'
 
 const textureById = new Map<string, string>()
 const readableById = new Map<string, string>()
@@ -34,8 +35,10 @@ export async function itemIconUrl(itemId: string): Promise<string | undefined> {
   }
 }
 
-/** 物品显示名：优先 manifest 官方英文名（如 "Diamond Sword"），未知 id 退化为 ID 驼峰化 */
+/** 物品显示名：优先官方简体中文（zh_cn 字典），未知中文回退 manifest 英文名，再退 ID 驼峰化 */
 export function prettyLabel(itemId: string): string {
+  const zh = zhItemName(itemId)
+  if (zh) return zh
   const readable = readableById.get(itemId) ?? readableById.get(stripNamespace(itemId))
   if (readable) return readable
   return stripNamespace(itemId)

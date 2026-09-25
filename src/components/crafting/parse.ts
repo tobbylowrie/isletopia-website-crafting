@@ -1,21 +1,21 @@
 import type { ParseResult, ParsedRecipe, RecipeSlot, SlotKey } from './types'
 
 /**
- * 配方类型 → 面板种类 + 目录卡片徽章文案。
- * 徽章文案与源项目 getRecipeDefinition(...).label 一致。
+ * 配方类型 → 面板种类 + 目录卡片徽章文案（按 MC 中文社区通用术语）。
+ * 面板左上标签（合成/熔炉等）由 surfaces 查官方 container.* 语言键。
  */
 const TYPE_INFO: Record<string, { kind: ParsedRecipe['kind']; label: string }> = {
-  crafting_shaped: { kind: 'crafting', label: 'Crafting' },
-  crafting_shapeless: { kind: 'crafting', label: 'Crafting' },
-  smelting: { kind: 'furnace', label: 'Smelting' },
-  blasting: { kind: 'furnace', label: 'Blasting' },
-  smoking: { kind: 'furnace', label: 'Smoking' },
-  campfire_cooking: { kind: 'furnace', label: 'Campfire Cooking' },
-  stonecutting: { kind: 'stonecutter', label: 'Stonecutting' },
-  smithing_transform: { kind: 'smithing', label: 'Smithing Transform' },
-  smithing_trim: { kind: 'smithing', label: 'Smithing Trim' },
-  brewing: { kind: 'brewing', label: 'Brewing' },
-  crafting_decorated_pot: { kind: 'crafting', label: 'Decorated Pot' },
+  crafting_shaped: { kind: 'crafting', label: '合成' },
+  crafting_shapeless: { kind: 'crafting', label: '合成' },
+  smelting: { kind: 'furnace', label: '熔炼' },
+  blasting: { kind: 'furnace', label: '高炉' },
+  smoking: { kind: 'furnace', label: '烟熏' },
+  campfire_cooking: { kind: 'furnace', label: '营火烹饪' },
+  stonecutting: { kind: 'stonecutter', label: '切石' },
+  smithing_transform: { kind: 'smithing', label: '锻造升级' },
+  smithing_trim: { kind: 'smithing', label: '盔甲纹饰' },
+  brewing: { kind: 'brewing', label: '酿造' },
+  crafting_decorated_pot: { kind: 'crafting', label: '饰纹陶罐' },
 }
 
 /**
@@ -28,21 +28,21 @@ const FIELD_RECIPE_TYPES: Record<
   string,
   { label: string; fields: string[]; resultFallbackId?: string }
 > = {
-  crafting_transmute: { label: 'Transmute', fields: ['input', 'material'] },
-  crafting_dye: { label: 'Dye', fields: ['target', 'dye'] },
-  crafting_imbue: { label: 'Imbue', fields: ['material', 'source'] },
-  crafting_special_bannerduplicate: { label: 'Banner Duplication', fields: ['banner', 'banner'] },
-  crafting_special_bookcloning: { label: 'Book Cloning', fields: ['source', 'material'] },
-  crafting_special_firework_rocket: { label: 'Firework Rocket', fields: ['shell', 'fuel', 'star'] },
-  crafting_special_firework_star: { label: 'Firework Star', fields: ['fuel', 'dye', 'trail'] },
-  crafting_special_firework_star_fade: { label: 'Firework Star Fade', fields: ['target', 'dye'] },
+  crafting_transmute: { label: '转化', fields: ['input', 'material'] },
+  crafting_dye: { label: '染色', fields: ['target', 'dye'] },
+  crafting_imbue: { label: '浸染', fields: ['material', 'source'] },
+  crafting_special_bannerduplicate: { label: '旗帜复制', fields: ['banner', 'banner'] },
+  crafting_special_bookcloning: { label: '成书复制', fields: ['source', 'material'] },
+  crafting_special_firework_rocket: { label: '烟花火箭', fields: ['shell', 'fuel', 'star'] },
+  crafting_special_firework_star: { label: '烟花之星', fields: ['fuel', 'dye', 'trail'] },
+  crafting_special_firework_star_fade: { label: '烟花之星渐变', fields: ['target', 'dye'] },
   crafting_special_mapextending: {
-    label: 'Map Extending',
+    label: '地图扩展',
     fields: ['map', 'material'],
     resultFallbackId: 'minecraft:map',
   },
-  crafting_special_repairitem: { label: 'Repair Item', fields: [] },
-  crafting_special_shielddecoration: { label: 'Shield Decoration', fields: ['target', 'banner'] },
+  crafting_special_repairitem: { label: '物品修复', fields: [] },
+  crafting_special_shielddecoration: { label: '盾牌装饰', fields: ['target', 'banner'] },
 }
 
 const SUPPORTED_HINT = Object.keys(TYPE_INFO).join(' / ')
@@ -319,6 +319,27 @@ function parseDecoratedPot(raw: Record<string, unknown>): ParseResult {
   return { ok: true, recipe: { kind: 'crafting', gridSize: 3, label: 'Decorated Pot', slots } }
 }
 
+/** 药水栈的显示名语言键：带 potion_contents 组件时生成 item.minecraft.<药水>.effect.<效果> */
+function potionNameKey(stack: unknown, itemId: string): string | undefined {
+  if (typeof stack !== 'object' || stack === null) return undefined
+  const obj = stack as Record<string, unknown>
+  const components =
+    typeof obj.components === 'object' && obj.components !== null
+      ? (obj.components as Record<string, unknown>)
+      : undefined
+  const contents =
+    typeof obj.potion_contents === 'object' && obj.potion_contents !== null
+      ? obj.potion_contents
+      : components?.['minecraft:potion_contents']
+  if (typeof contents !== 'object' || contents === null) return undefined
+  const c = contents as Record<string, unknown>
+  const effect =
+    typeof c.potion === 'string' ? c.potion : typeof c.potions === 'string' ? c.potions : undefined
+  if (!effect) return undefined
+  const kind = normalizeId(itemId).replace(/^minecraft:/, '')
+  return `item.minecraft.${kind}.effect.${effect.replace(/^minecraft:/, '')}`
+}
+
 /** 酿造：input（药水瓶）+ reagent（酿造原料）→ output，对齐酿造台槽位语义 */
 function parseBrewing(raw: Record<string, unknown>): ParseResult {
   const input = parseItemRef(raw.input)
@@ -330,6 +351,8 @@ function parseBrewing(raw: Record<string, unknown>): ParseResult {
   const output = parseItemRef(raw.output)
   if (output === null) return fail('brewing 配方缺少 output 字段')
   if (typeof output === 'string') return fail(`output：${output}`)
+  input.nameKey = potionNameKey(raw.input, input.id)
+  output.nameKey = potionNameKey(raw.output, output.id)
 
   return {
     ok: true,

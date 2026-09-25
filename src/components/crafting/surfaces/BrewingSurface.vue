@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import CardFrame from '../CardFrame.vue'
 import McSlotView from '../McSlotView.vue'
+import { zhLangText } from '../lang'
 import { CraftingArrow } from '../mcUiArt'
 import type { RecipeSlot, SlotKey } from '../types'
 
@@ -12,10 +13,12 @@ import type { RecipeSlot, SlotKey } from '../types'
 defineProps<{
   slots: Partial<Record<SlotKey, RecipeSlot>>
 }>()
+
+const label = zhLangText('container.brewing') ?? 'Brewing'
 </script>
 
 <template>
-  <CardFrame label="Brewing" center-label align="center" :preferred-width="352" :min-width="220">
+  <CardFrame :label="label" center-label align="center" :preferred-width="352" :min-width="220">
     <div class="brewing-row">
       <div class="brewing-column">
         <McSlotView :item="slots['brewing.reagent'] ?? null" />

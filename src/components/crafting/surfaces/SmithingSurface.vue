@@ -2,6 +2,7 @@
 import CardFrame from '../CardFrame.vue'
 import McUiLabel from '../McUiLabel.vue'
 import McSlotView from '../McSlotView.vue'
+import { zhLangText } from '../lang'
 import { CraftingArrow, SmithingHammer } from '../mcUiArt'
 import type { RecipeSlot, SlotKey } from '../types'
 
@@ -12,6 +13,8 @@ import type { RecipeSlot, SlotKey } from '../types'
 defineProps<{
   slots: Partial<Record<SlotKey, RecipeSlot>>
 }>()
+
+const label = zhLangText('container.upgrade') ?? 'Upgrade Gear'
 </script>
 
 <template>
@@ -22,7 +25,7 @@ defineProps<{
       </div>
 
       <div class="smithing-gear-label">
-        <McUiLabel>Upgrade Gear</McUiLabel>
+        <McUiLabel>{{ label }}</McUiLabel>
       </div>
 
       <div class="smithing-slot is-template">

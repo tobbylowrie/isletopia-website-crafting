@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import CardFrame from '../CardFrame.vue'
 import McSlotView from '../McSlotView.vue'
+import { zhLangText } from '../lang'
 import { CraftingArrow } from '../mcUiArt'
 import type { RecipeSlot, SlotKey } from '../types'
 
@@ -13,6 +14,8 @@ const props = defineProps<{
   slots: Partial<Record<SlotKey, RecipeSlot>>
   gridSize?: 2 | 3
 }>()
+
+const label = zhLangText('container.crafting') ?? 'Crafting'
 
 const twoByTwo = computed(() => props.gridSize === 2)
 const columns = computed(() => (twoByTwo.value ? 2 : 3))
@@ -35,7 +38,7 @@ const gridKeys = computed<SlotKey[]>(() =>
 
 <template>
   <CardFrame
-    label="Crafting"
+    :label="label"
     align="center"
     :preferred-width="twoByTwo ? 316 : 352"
     :min-width="twoByTwo ? 236 : 256"

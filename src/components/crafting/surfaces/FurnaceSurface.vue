@@ -1,21 +1,24 @@
 <script setup lang="ts">
 import CardFrame from '../CardFrame.vue'
 import McSlotView from '../McSlotView.vue'
+import { zhLangText } from '../lang'
 import { CraftingArrow, FurnaceFire } from '../mcUiArt'
 import type { RecipeSlot, SlotKey } from '../types'
 
 /**
  * 熔炉面板（移植自源项目 FurnacePreviewSurface）。
- * 四种烹饪变体（熔炼/高炉/烟熏/营火）共用此面板，面板标签恒为 "Furnace"，
- * 变体由目录卡片的类型徽章区分。燃料槽为纯装饰（JSON 配方不含燃料，恒空）。
+ * 四种烹饪变体（熔炼/高炉/烟熏/营火）共用此面板，变体由目录卡片的类型徽章区分。
+ * 燃料槽为纯装饰（JSON 配方不含燃料，恒空）。
  */
 defineProps<{
   slots: Partial<Record<SlotKey, RecipeSlot>>
 }>()
+
+const label = zhLangText('container.furnace') ?? 'Furnace'
 </script>
 
 <template>
-  <CardFrame label="Furnace" center-label align="center" :preferred-width="352" :min-width="220">
+  <CardFrame :label="label" center-label align="center" :preferred-width="352" :min-width="220">
     <div class="furnace-row">
       <div class="furnace-column">
         <McSlotView :item="slots['cooking.ingredient'] ?? null" />

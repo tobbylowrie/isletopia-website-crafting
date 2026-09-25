@@ -301,7 +301,7 @@ onBeforeUnmount(() => scrollObserver?.disconnect())
           v-model="query"
           class="catalog-search"
           type="search"
-          placeholder="搜索配方 id 或产物名（如 pickaxe、diamond_sword）"
+          placeholder="搜索配方 id 或产物名（如 pickaxe、钻石剑）"
         />
         <div class="kind-chips">
           <button

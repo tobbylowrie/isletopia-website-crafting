@@ -1,7 +1,17 @@
-/* Minecraft 像素字体（文件移植自源项目 public/fonts/Minecraft.woff） */
+/* Minecraft 像素字体（文件移植自源项目 public/fonts/Minecraft.woff；拉丁字符集） */
 @font-face {
   font-family: 'Minecraft';
   src: url('./fonts/Minecraft.woff') format('woff');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+/* GNU Unifont 像素字体（scripts/fetch-unifont.mjs 自 unifoundry 官方下载入库），
+   补充 Minecraft 字体缺失的 CJK 等非拉丁字形，与游戏内 unifont 方案一致 */
+@font-face {
+  font-family: 'Unifont';
+  src: url('./fonts/unifont.otf') format('opentype');
   font-style: normal;
   font-weight: 400;
   font-display: swap;
@@ -18,9 +28,9 @@ body {
 }
 
 :root {
-  /* Minecraft 字体回退链（移植自源项目 Tailwind 主题 --font-minecraft） */
-  --font-minecraft: 'Minecraft', 'Minecraftia', ui-monospace, 'SFMono-Regular', Menlo, Monaco,
-    Consolas, 'Liberation Mono', 'Courier New', monospace;
+  /* MC 字体回退链：拉丁走 Minecraft，中文等非拉丁回退 Unifont（移植自源项目 Tailwind 主题 --font-minecraft） */
+  --font-minecraft: 'Minecraft', 'Unifont', 'Minecraftia', ui-monospace, 'SFMono-Regular', Menlo,
+    Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
 
   /*
    * 目录卡片主题变量（移植自源项目 mist / emerald 色阶），默认亮色，.dark 覆盖。

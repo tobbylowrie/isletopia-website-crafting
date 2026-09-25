@@ -62,7 +62,11 @@ export default defineConfig({
     },
   },
   build: {
-    // MC 物品贴图保持为独立 PNG（按需异步加载），不以 base64 内联进 JS chunk
-    assetsInlineLimit: (filePath) => !filePath.replaceAll('\\', '/').includes('minecraft-textures'),
+    // MC 物品贴图与字体保持为独立文件（按需异步加载），不以 base64 内联进 JS/CSS
+    assetsInlineLimit: (filePath) => {
+      const normalized = filePath.replaceAll('\\', '/')
+      if (normalized.includes('minecraft-textures')) return false
+      return !normalized.includes('/fonts/')
+    },
   },
 })

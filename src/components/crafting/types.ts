@@ -30,6 +30,8 @@ export interface RecipeSlot {
   count: number
   /** 引用来自 tag（无具体图标，轮播展示成员） */
   isTag?: boolean
+  /** 显示名语言键覆盖（如酿造药水 "item.minecraft.potion.effect.strength"），优先于 id 推断 */
+  nameKey?: string
 }
 
 /** 配方种类，决定渲染使用的面板 */

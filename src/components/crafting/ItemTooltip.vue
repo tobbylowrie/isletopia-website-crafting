@@ -128,6 +128,9 @@ onBeforeUnmount(() => {
   white-space: nowrap;
   line-height: 1.25em;
   margin: 0.125em 0.25em;
+  /* 16px 恰为 Unifont 原生网格，关闭平滑保持点阵锐利 */
+  font-smooth: none;
+  -webkit-font-smoothing: none;
   pointer-events: none;
   z-index: 99;
 }
