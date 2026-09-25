@@ -87,9 +87,9 @@ export function parseRecipe(input: unknown): ParseResult {
 
   switch (info.kind) {
     case 'crafting': {
-      if (type === 'crafting_shaped') return parseShaped(raw)
-      if (type === 'crafting_shapeless') return parseShapeless(raw)
-      if (type === 'crafting_decorated_pot') return parseDecoratedPot(raw)
+      if (type === 'crafting_shaped') return parseShaped(raw, info.label)
+      if (type === 'crafting_shapeless') return parseShapeless(raw, info.label)
+      if (type === 'crafting_decorated_pot') return parseDecoratedPot(raw, info.label)
       const def = FIELD_RECIPE_TYPES[type]
       return def ? parseFieldRecipe(raw, def) : fail(`不支持的配方类型 "${String(raw.type)}"`)
     }
@@ -98,7 +98,7 @@ export function parseRecipe(input: unknown): ParseResult {
     case 'stonecutter':
       return parseWithIngredient(raw, info, 'stonecutter.ingredient', 'stonecutter.result', raw.count)
     case 'brewing':
-      return parseBrewing(raw)
+      return parseBrewing(raw, info.label)
     case 'smithing':
       return parseSmithing(raw, info.label)
   }
@@ -164,7 +164,7 @@ function parseResultSlot(raw: Record<string, unknown>, fallbackCount?: unknown):
   }
 }
 
-function parseShaped(raw: Record<string, unknown>): ParseResult {
+function parseShaped(raw: Record<string, unknown>, label: string): ParseResult {
   const pattern = raw.pattern
   if (!Array.isArray(pattern) || pattern.length === 0 || pattern.length > 3) {
     return fail('crafting_shaped 的 pattern 必须是 1~3 行的字符串数组')
@@ -200,10 +200,10 @@ function parseShaped(raw: Record<string, unknown>): ParseResult {
   const result = parseResultSlot(raw)
   if (typeof result === 'string') return fail(result)
   slots['crafting.result'] = result
-  return { ok: true, recipe: { kind: 'crafting', gridSize, label: 'Crafting', slots } }
+  return { ok: true, recipe: { kind: 'crafting', gridSize, label, slots } }
 }
 
-function parseShapeless(raw: Record<string, unknown>): ParseResult {
+function parseShapeless(raw: Record<string, unknown>, label: string): ParseResult {
   const ingredients = raw.ingredients
   if (!Array.isArray(ingredients)) return fail('crafting_shapeless 的 ingredients 必须是数组')
   if (ingredients.length === 0) return fail('ingredients 不能为空')
@@ -223,7 +223,7 @@ function parseShapeless(raw: Record<string, unknown>): ParseResult {
   if (typeof result === 'string') return fail(result)
   slots['crafting.result'] = result
   // 无序配方恒以 3x3 面板展示
-  return { ok: true, recipe: { kind: 'crafting', gridSize: 3, label: 'Crafting', slots } }
+  return { ok: true, recipe: { kind: 'crafting', gridSize: 3, label, slots } }
 }
 
 /** 熔炉/高炉/烟熏配方的燃料槽：展示合成燃料组（游戏内燃料数据不在配方 JSON 中） */
@@ -269,13 +269,18 @@ function parseSmithing(raw: Record<string, unknown>, label: string): ParseResult
     slots[`smithing.${field}` as SlotKey] = slot
   }
 
-  // smithing_trim 没有产物字段（纹饰保留基物品），产物槽回退用 base 展示
+  // smithing_trim 没有产物字段（纹饰保留基物品），产物槽回退用 base 展示；
+  // 卡片标题以锻造模板物品命名（base 是 #trimmable_armor tag，直接展示只会得到英文 tag 名）
+  let titleItem: string | undefined
   const result = raw.result === undefined ? slots['smithing.base'] : parseResultSlot(raw)
   if (typeof result === 'string') return fail(result)
   if (!result) return fail('smithing 配方缺少 result 字段')
   slots['smithing.result'] = result
+  if (raw.result === undefined && typeof raw.template === 'string') {
+    titleItem = normalizeId(raw.template)
+  }
 
-  return { ok: true, recipe: { kind: 'smithing', label, slots } }
+  return { ok: true, recipe: { kind: 'smithing', label, titleItem, slots } }
 }
 
 /** 字段式配方（transmute/dye/imbue 与 crafting_special_*）：字段顺序映射无序槽位 */
@@ -316,7 +321,7 @@ function parseFieldRecipe(
 }
 
 /** 饰纹陶罐：front/left/right/back 四个装饰槽呈菱形排布（2/4/6/8） */
-function parseDecoratedPot(raw: Record<string, unknown>): ParseResult {
+function parseDecoratedPot(raw: Record<string, unknown>, label: string): ParseResult {
   const POSITIONS = { front: 2, left: 4, right: 6, back: 8 } as const
   const slots: Partial<Record<SlotKey, RecipeSlot>> = {}
   let filled = 0
@@ -332,7 +337,7 @@ function parseDecoratedPot(raw: Record<string, unknown>): ParseResult {
   const result = parseResultSlot(raw)
   if (typeof result === 'string') return fail(result)
   slots['crafting.result'] = result
-  return { ok: true, recipe: { kind: 'crafting', gridSize: 3, label: 'Decorated Pot', slots } }
+  return { ok: true, recipe: { kind: 'crafting', gridSize: 3, label, slots } }
 }
 
 /** 药水栈的显示名语言键：带 potion_contents 组件时生成 item.minecraft.<药水>.effect.<效果> */
@@ -357,7 +362,7 @@ function potionNameKey(stack: unknown, itemId: string): string | undefined {
 }
 
 /** 酿造：input（药水瓶）+ reagent（酿造原料）→ output，对齐酿造台槽位语义 */
-function parseBrewing(raw: Record<string, unknown>): ParseResult {
+function parseBrewing(raw: Record<string, unknown>, label: string): ParseResult {
   const input = parseItemRef(raw.input)
   if (input === null) return fail('brewing 配方缺少 input 字段')
   if (typeof input === 'string') return fail(`input：${input}`)
@@ -374,7 +379,7 @@ function parseBrewing(raw: Record<string, unknown>): ParseResult {
     ok: true,
     recipe: {
       kind: 'brewing',
-      label: 'Brewing',
+      label,
       slots: { 'brewing.input': input, 'brewing.reagent': reagent, 'brewing.output': output },
     },
   }

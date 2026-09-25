@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { RecipeCard, parseRecipe, slotDisplayName } from './components/crafting'
+import { RecipeCard, parseRecipe, recipeTitle } from './components/crafting'
 import type { RecipeKind, VanillaRecipeJson } from './components/crafting'
 import { VANILLA_RECIPES } from './data/vanilla-recipes'
 
@@ -145,15 +145,6 @@ function loadSample(sample: (typeof SAMPLES)[number]) {
 
 /* ------- 原版配方目录（26.3 全量 2042 条） ------- */
 
-/** 产物槽位键（与 RecipeCard 内标题逻辑一致） */
-const RESULT_KEYS = [
-  'crafting.result',
-  'cooking.result',
-  'brewing.output',
-  'stonecutter.result',
-  'smithing.result',
-] as const
-
 interface CatalogEntry {
   id: string
   raw: VanillaRecipeJson
@@ -186,12 +177,7 @@ const catalog: CatalogEntry[] = VANILLA_RECIPES.map(({ id, recipe }) => {
   const parsed = parseRecipe(recipe)
   if (!parsed.ok) return { id, raw: recipe, kind: null, title: '', searchText: id.toLowerCase() }
   const { recipe: parsedRecipe } = parsed
-  let resultSlot
-  for (const key of RESULT_KEYS) {
-    resultSlot = parsedRecipe.slots[key]
-    if (resultSlot) break
-  }
-  const title = resultSlot ? slotDisplayName(resultSlot) : parsedRecipe.label
+  const title = recipeTitle(parsedRecipe)
   return {
     id,
     raw: recipe,

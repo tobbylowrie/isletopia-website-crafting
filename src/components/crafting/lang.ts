@@ -14,10 +14,14 @@ function strip(id: string): string {
   return i === -1 ? id : id.slice(i + 1)
 }
 
-/** 物品 id -> 官方中文名（依次查物品键、方块键）；未知物品返回 undefined */
+/** 物品 id -> 官方中文名（依次查组件化名称键 .new、物品键、方块键）；未知物品返回 undefined */
 export function zhItemName(itemId: string): string | undefined {
   const name = strip(itemId)
-  return lang[`item.minecraft.${name}`] ?? lang[`block.minecraft.${name}`]
+  return (
+    lang[`item.minecraft.${name}.new`] ??
+    lang[`item.minecraft.${name}`] ??
+    lang[`block.minecraft.${name}`]
+  )
 }
 
 /** 直接按语言键取官方文案（如药水 "item.minecraft.potion.effect.strength"、GUI "container.furnace"） */

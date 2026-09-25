@@ -7,6 +7,7 @@
  */
 import { items as manifestItems, urlLoaders } from 'virtual:mc-textures'
 import { zhDisplayName, zhItemName } from './lang'
+import type { ParsedRecipe, SlotKey } from './types'
 
 const textureById = new Map<string, string>()
 const readableById = new Map<string, string>()
@@ -42,6 +43,28 @@ export function slotDisplayName(slot: { id: string; nameKey?: string }): string 
     if (zh) return zh
   }
   return prettyLabel(slot.id)
+}
+
+/** 目录卡片标题的产物槽位顺序 */
+const RESULT_KEYS: SlotKey[] = [
+  'crafting.result',
+  'cooking.result',
+  'brewing.output',
+  'stonecutter.result',
+  'smithing.result',
+]
+
+/** 目录卡片标题：titleItem（如纹饰配方以锻造模板命名）优先，其次产物槽位显示名，无产物回退类型徽章 */
+export function recipeTitle(recipe: ParsedRecipe): string {
+  if (recipe.titleItem) {
+    const zh = zhItemName(recipe.titleItem)
+    if (zh) return zh
+  }
+  for (const key of RESULT_KEYS) {
+    const slot = recipe.slots[key]
+    if (slot) return slotDisplayName(slot)
+  }
+  return recipe.label
 }
 
 /** 物品显示名：优先官方简体中文（zh_cn 字典），未知中文回退 manifest 英文名，再退 ID 驼峰化 */

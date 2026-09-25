@@ -74,6 +74,8 @@ export interface ParsedRecipe {
   label: string
   /** furnace 面板标题的容器语言键（熔炉/高炉/烟熏炉/营火），其它面板忽略 */
   containerKey?: string
+  /** 卡片标题物品 id 覆盖（如纹饰配方以锻造模板命名），优先于产物槽位名 */
+  titleItem?: string
   slots: Partial<Record<SlotKey, RecipeSlot>>
 }
 
