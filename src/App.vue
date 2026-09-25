@@ -203,6 +203,7 @@ onBeforeUnmount(() => {
 
 <template>
   <main class="demo">
+    <h1 class="page-title">服务器合成表</h1>
     <section class="gallery">
       <div class="catalog-toolbar">
         <input
@@ -258,7 +259,6 @@ onBeforeUnmount(() => {
   padding: 24px 16px 64px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
 }
 
 .kind-chips button {
@@ -274,11 +274,11 @@ onBeforeUnmount(() => {
   cursor: pointer;
 }
 
-.kind-chips button:not(.custom):not(.favorites):hover {
+.kind-chips button:not(.custom):not(.favorites):not(.catalog-clear):hover {
   background: #7d7f92;
 }
 
-.kind-chips button:not(.custom):not(.favorites).active {
+.kind-chips button:not(.custom):not(.favorites):not(.catalog-clear).active {
   background: #5a7fb0;
 }
 
@@ -310,13 +310,13 @@ onBeforeUnmount(() => {
   background: #e09b00;
 }
 
-/* 清空收藏：有收藏时显示在分类行末，两步确认后变红 */
-.catalog-clear {
+/* 清空收藏：红色警示按钮，确认时加深（双类提升特异性，避免被 .kind-chips button 覆盖） */
+.kind-chips .catalog-clear {
   padding: 7px 12px;
   font-size: 13px;
   color: #fff;
   text-shadow: 1px 1px 0 #3f3f3f;
-  background: #6f6b66;
+  background: #a33b3b;
   border: 2px solid #000;
   box-shadow:
     inset 2px 2px 0 rgba(255, 255, 255, 0.35),
@@ -324,8 +324,22 @@ onBeforeUnmount(() => {
   cursor: pointer;
 }
 
-.catalog-clear.confirm {
-  background: #a33b3b;
+.kind-chips .catalog-clear:hover {
+  background: #b34848;
+}
+
+.kind-chips .catalog-clear.confirm {
+  background: #7e2626;
+}
+
+/* 页面标题：常规正文字体，居中 */
+.page-title {
+  margin: 0;
+  text-align: center;
+  font-size: 2rem;
+  line-height: 1.25;
+  font-weight: 700;
+  color: var(--rc-foreground);
 }
 
 /* 配方目录网格（最小 320px 列、16px 间距、响应式列数） */
@@ -343,6 +357,8 @@ onBeforeUnmount(() => {
 }
 
 .catalog-search {
+  /* 上下大号 margin，撑开标题与筛选区 */
+  margin: 40px 0;
   width: 100%;
   max-width: 720px;
   padding: 14px 20px;
