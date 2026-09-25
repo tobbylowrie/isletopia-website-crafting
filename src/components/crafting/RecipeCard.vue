@@ -5,6 +5,7 @@ import { prettyLabel } from './icons'
 import type { ParsedRecipe, RecipeSlot, SlotKey } from './types'
 import CraftingSurface from './surfaces/CraftingSurface.vue'
 import FurnaceSurface from './surfaces/FurnaceSurface.vue'
+import BrewingSurface from './surfaces/BrewingSurface.vue'
 import SmithingSurface from './surfaces/SmithingSurface.vue'
 import StonecutterSurface from './surfaces/StonecutterSurface.vue'
 
@@ -34,6 +35,7 @@ const scaleValue = computed(() => {
 const RESULT_KEYS: SlotKey[] = [
   'crafting.result',
   'cooking.result',
+  'brewing.output',
   'stonecutter.result',
   'smithing.result',
 ]
@@ -89,6 +91,7 @@ const wrapperStyle = computed(() => {
               :grid-size="parsed.recipe.gridSize"
             />
             <FurnaceSurface v-else-if="parsed.recipe.kind === 'furnace'" :slots="parsed.recipe.slots" />
+            <BrewingSurface v-else-if="parsed.recipe.kind === 'brewing'" :slots="parsed.recipe.slots" />
             <StonecutterSurface
               v-else-if="parsed.recipe.kind === 'stonecutter'"
               :slots="parsed.recipe.slots"

@@ -14,6 +14,35 @@ const TYPE_INFO: Record<string, { kind: ParsedRecipe['kind']; label: string }> =
   stonecutting: { kind: 'stonecutter', label: 'Stonecutting' },
   smithing_transform: { kind: 'smithing', label: 'Smithing Transform' },
   smithing_trim: { kind: 'smithing', label: 'Smithing Trim' },
+  brewing: { kind: 'brewing', label: 'Brewing' },
+  crafting_decorated_pot: { kind: 'crafting', label: 'Decorated Pot' },
+}
+
+/**
+ * 字段式配方：按固定字段顺序映射为无序合成槽位（SHAPELESS_ORDER）。
+ * 覆盖 1.21+ 的 transmute/dye/imbue 与各 crafting_special_*（合成逻辑硬编码于游戏，
+ * JSON 只带提示字段）。fields 允许重复字段名（如 bannerduplicate 的两份 banner），
+ * 缺失字段跳过；resultFallbackId 用于产物字段为空对象的配方（mapextending）。
+ */
+const FIELD_RECIPE_TYPES: Record<
+  string,
+  { label: string; fields: string[]; resultFallbackId?: string }
+> = {
+  crafting_transmute: { label: 'Transmute', fields: ['input', 'material'] },
+  crafting_dye: { label: 'Dye', fields: ['target', 'dye'] },
+  crafting_imbue: { label: 'Imbue', fields: ['material', 'source'] },
+  crafting_special_bannerduplicate: { label: 'Banner Duplication', fields: ['banner', 'banner'] },
+  crafting_special_bookcloning: { label: 'Book Cloning', fields: ['source', 'material'] },
+  crafting_special_firework_rocket: { label: 'Firework Rocket', fields: ['shell', 'fuel', 'star'] },
+  crafting_special_firework_star: { label: 'Firework Star', fields: ['fuel', 'dye', 'trail'] },
+  crafting_special_firework_star_fade: { label: 'Firework Star Fade', fields: ['target', 'dye'] },
+  crafting_special_mapextending: {
+    label: 'Map Extending',
+    fields: ['map', 'material'],
+    resultFallbackId: 'minecraft:map',
+  },
+  crafting_special_repairitem: { label: 'Repair Item', fields: [] },
+  crafting_special_shielddecoration: { label: 'Shield Decoration', fields: ['target', 'banner'] },
 }
 
 const SUPPORTED_HINT = Object.keys(TYPE_INFO).join(' / ')
@@ -44,18 +73,29 @@ export function parseRecipe(input: unknown): ParseResult {
 
   const raw = data as Record<string, unknown>
   const type = typeof raw.type === 'string' ? raw.type.replace(/^minecraft:/, '') : ''
+
+  const fieldDef = FIELD_RECIPE_TYPES[type]
+  if (fieldDef) return parseFieldRecipe(raw, fieldDef)
+
   const info = TYPE_INFO[type]
   if (!info) {
     return fail(`不支持的配方类型 "${String(raw.type ?? '(缺失)')}"，当前支持 ${SUPPORTED_HINT}`)
   }
 
   switch (info.kind) {
-    case 'crafting':
-      return type === 'crafting_shaped' ? parseShaped(raw) : parseShapeless(raw)
+    case 'crafting': {
+      if (type === 'crafting_shaped') return parseShaped(raw)
+      if (type === 'crafting_shapeless') return parseShapeless(raw)
+      if (type === 'crafting_decorated_pot') return parseDecoratedPot(raw)
+      const def = FIELD_RECIPE_TYPES[type]
+      return def ? parseFieldRecipe(raw, def) : fail(`不支持的配方类型 "${String(raw.type)}"`)
+    }
     case 'furnace':
       return parseWithIngredient(raw, info, 'cooking.ingredient', 'cooking.result')
     case 'stonecutter':
       return parseWithIngredient(raw, info, 'stonecutter.ingredient', 'stonecutter.result', raw.count)
+    case 'brewing':
+      return parseBrewing(raw)
     case 'smithing':
       return parseSmithing(raw, info.label)
   }
@@ -220,4 +260,83 @@ function parseSmithing(raw: Record<string, unknown>, label: string): ParseResult
   slots['smithing.result'] = result
 
   return { ok: true, recipe: { kind: 'smithing', label, slots } }
+}
+
+/** 字段式配方（transmute/dye/imbue 与 crafting_special_*）：字段顺序映射无序槽位 */
+function parseFieldRecipe(
+  raw: Record<string, unknown>,
+  def: { label: string; fields: string[]; resultFallbackId?: string },
+): ParseResult {
+  const slots: Partial<Record<SlotKey, RecipeSlot>> = {}
+  let i = 0
+  for (const field of def.fields) {
+    const slot = parseItemRef(raw[field])
+    if (typeof slot === 'string') return fail(`${field}：${slot}`)
+    if (!slot) continue
+    // transmute 的 material_count 指定材料耗量（如染色潜影盒）
+    if (field === 'material' && typeof raw.material_count === 'number' && raw.material_count >= 1) {
+      slot.count = Math.floor(raw.material_count)
+    }
+    slots[`crafting.${SHAPELESS_ORDER[i++]}` as SlotKey] = slot
+  }
+
+  let result = parseResultSlot(raw)
+  if (typeof result === 'string') {
+    // 产物为空对象（mapextending / map_cloning）时回退：显式指定 id → material → input
+    if (def.resultFallbackId) {
+      result = { id: def.resultFallbackId, count: 1 }
+    } else {
+      const ref = parseItemRef(raw.material) ?? parseItemRef(raw.input)
+      if (ref && typeof ref !== 'string') result = ref
+    }
+    // repairitem 等全动态配方：JSON 无任何字段，展示空合成面板 + 类型徽章
+    if (typeof result === 'string' && def.fields.length === 0) {
+      return { ok: true, recipe: { kind: 'crafting', gridSize: 3, label: def.label, slots } }
+    }
+  }
+  if (typeof result === 'string') return fail(result)
+  slots['crafting.result'] = result
+  return { ok: true, recipe: { kind: 'crafting', gridSize: 3, label: def.label, slots } }
+}
+
+/** 饰纹陶罐：front/left/right/back 四个装饰槽呈菱形排布（2/4/6/8） */
+function parseDecoratedPot(raw: Record<string, unknown>): ParseResult {
+  const POSITIONS = { front: 2, left: 4, right: 6, back: 8 } as const
+  const slots: Partial<Record<SlotKey, RecipeSlot>> = {}
+  let filled = 0
+  for (const [field, pos] of Object.entries(POSITIONS)) {
+    const slot = parseItemRef(raw[field])
+    if (typeof slot === 'string') return fail(`${field}：${slot}`)
+    if (!slot) continue
+    slots[`crafting.${pos}` as SlotKey] = slot
+    filled++
+  }
+  if (filled === 0) return fail('crafting_decorated_pot 缺少 front/left/right/back 字段')
+
+  const result = parseResultSlot(raw)
+  if (typeof result === 'string') return fail(result)
+  slots['crafting.result'] = result
+  return { ok: true, recipe: { kind: 'crafting', gridSize: 3, label: 'Decorated Pot', slots } }
+}
+
+/** 酿造：input（药水瓶）+ reagent（酿造原料）→ output，对齐酿造台槽位语义 */
+function parseBrewing(raw: Record<string, unknown>): ParseResult {
+  const input = parseItemRef(raw.input)
+  if (input === null) return fail('brewing 配方缺少 input 字段')
+  if (typeof input === 'string') return fail(`input：${input}`)
+  const reagent = parseItemRef(raw.reagent)
+  if (reagent === null) return fail('brewing 配方缺少 reagent 字段')
+  if (typeof reagent === 'string') return fail(`reagent：${reagent}`)
+  const output = parseItemRef(raw.output)
+  if (output === null) return fail('brewing 配方缺少 output 字段')
+  if (typeof output === 'string') return fail(`output：${output}`)
+
+  return {
+    ok: true,
+    recipe: {
+      kind: 'brewing',
+      label: 'Brewing',
+      slots: { 'brewing.input': input, 'brewing.reagent': reagent, 'brewing.output': output },
+    },
+  }
 }

@@ -33,7 +33,7 @@ export interface RecipeSlot {
 }
 
 /** 配方种类，决定渲染使用的面板 */
-export type RecipeKind = 'crafting' | 'furnace' | 'stonecutter' | 'smithing'
+export type RecipeKind = 'crafting' | 'furnace' | 'brewing' | 'stonecutter' | 'smithing'
 
 /**
  * 统一槽位键（沿用源项目命名）。
@@ -52,6 +52,9 @@ export type SlotKey =
   | 'crafting.result'
   | 'cooking.ingredient'
   | 'cooking.result'
+  | 'brewing.reagent'
+  | 'brewing.input'
+  | 'brewing.output'
   | 'stonecutter.ingredient'
   | 'stonecutter.result'
   | 'smithing.template'
