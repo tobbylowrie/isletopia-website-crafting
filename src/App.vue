@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { RecipeCard, parseRecipe, prettyLabel } from './components/crafting'
+import { RecipeCard, parseRecipe, slotDisplayName } from './components/crafting'
 import type { RecipeKind, VanillaRecipeJson } from './components/crafting'
 import { VANILLA_RECIPES } from './data/vanilla-recipes'
 
@@ -191,7 +191,7 @@ const catalog: CatalogEntry[] = VANILLA_RECIPES.map(({ id, recipe }) => {
     resultSlot = parsedRecipe.slots[key]
     if (resultSlot) break
   }
-  const title = resultSlot ? prettyLabel(resultSlot.id) : parsedRecipe.label
+  const title = resultSlot ? slotDisplayName(resultSlot) : parsedRecipe.label
   return {
     id,
     raw: recipe,

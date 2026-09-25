@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { parseRecipe } from './parse'
-import { prettyLabel } from './icons'
+import { slotDisplayName } from './icons'
 import type { ParsedRecipe, RecipeSlot, SlotKey } from './types'
 import CraftingSurface from './surfaces/CraftingSurface.vue'
 import FurnaceSurface from './surfaces/FurnaceSurface.vue'
@@ -31,7 +31,7 @@ const scaleValue = computed(() => {
   return typeof s === 'number' && Number.isFinite(s) && s > 0 ? s : 1
 })
 
-// 卡片标题 = 产物物品显示名（与源目录页 getRecipeCardTitle 一致），无产物时回退类型标签
+// 卡片标题 = 产物槽位显示名（药水按 nameKey 取具体药水名），无产物时回退类型标签
 const RESULT_KEYS: SlotKey[] = [
   'crafting.result',
   'cooking.result',
@@ -47,7 +47,7 @@ const title = computed(() => {
     result = recipe.slots[key]
     if (result) break
   }
-  return result ? prettyLabel(result.id) : recipe.label
+  return result ? slotDisplayName(result) : recipe.label
 })
 
 // transform: scale 不改变布局占位，用 ResizeObserver 量自然尺寸撑开 wrapper

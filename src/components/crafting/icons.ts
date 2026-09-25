@@ -6,7 +6,7 @@
  * 贴图按需异步加载，运行时零网络请求。MC 版本统一在 vite.config.ts 的 MC_VERSION。
  */
 import { items as manifestItems, urlLoaders } from 'virtual:mc-textures'
-import { zhItemName } from './lang'
+import { zhDisplayName, zhItemName } from './lang'
 
 const textureById = new Map<string, string>()
 const readableById = new Map<string, string>()
@@ -33,6 +33,15 @@ export async function itemIconUrl(itemId: string): Promise<string | undefined> {
   } catch {
     return undefined
   }
+}
+
+/** 槽位显示名：nameKey（药水等带组件物品，如 "item.minecraft.potion.effect.strength"）优先，其次按 id 解析 */
+export function slotDisplayName(slot: { id: string; nameKey?: string }): string {
+  if (slot.nameKey) {
+    const zh = zhDisplayName(slot.nameKey)
+    if (zh) return zh
+  }
+  return prettyLabel(slot.id)
 }
 
 /** 物品显示名：优先官方简体中文（zh_cn 字典），未知中文回退 manifest 英文名，再退 ID 驼峰化 */

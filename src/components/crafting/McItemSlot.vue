@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import type { RecipeSlot } from './types'
-import { itemIconUrl, prettyLabel, stripNamespace } from './icons'
-import { zhDisplayName } from './lang'
+import { itemIconUrl, prettyLabel, slotDisplayName, stripNamespace } from './icons'
 import { prettyTagLabel, tagMembers } from './tags'
 import { useTagCycleIndex } from './useTagCycleIndex'
 import ItemTooltip from './ItemTooltip.vue'
@@ -64,7 +63,7 @@ const tipName = computed(() => {
       ? (props.labels?.[current] ?? prettyLabel(current))
       : `任意 ${prettyTagLabel(item.id)}`
   }
-  return props.labels?.[item.id] ?? (item.nameKey ? zhDisplayName(item.nameKey) : undefined) ?? prettyLabel(item.id)
+  return props.labels?.[item.id] ?? slotDisplayName(item)
 })
 
 const tipDescription = computed(() => {
