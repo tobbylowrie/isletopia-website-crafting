@@ -22,8 +22,10 @@ const props = withDefaults(
     scale?: number
     /** 是否已收藏（收藏状态由调用方持有，卡片仅展示与上报点击） */
     favorite?: boolean
+    /** 附加徽章文案（黄色，如自定义配方显示「服务器自定义」），与类型徽章并列展示 */
+    badge?: string
   }>(),
-  { scale: 1, favorite: false },
+  { scale: 1, favorite: false, badge: undefined },
 )
 
 const emit = defineEmits<{ (e: 'toggle-favorite'): void }>()
@@ -84,6 +86,7 @@ const wrapperStyle = computed(() => {
             </svg>
             <span>{{ favorite ? '取消收藏' : '收藏' }}</span>
           </button>
+          <span v-if="badge" class="rc-badge is-yellow">{{ badge }}</span>
           <span class="rc-badge">{{ parsed.recipe.label }}</span>
         </div>
 
@@ -182,6 +185,13 @@ const wrapperStyle = computed(() => {
   line-height: 16px;
   font-weight: 600;
   user-select: none;
+}
+
+/* 黄色徽章变体（服务器自定义）：MC 金色文字 + 同色调底/边 */
+.rc-badge.is-yellow {
+  color: #ffaa00;
+  border-color: color-mix(in oklab, #ffaa00 35%, transparent);
+  background: color-mix(in oklab, #ffaa00 12%, transparent);
 }
 
 /* 收藏按钮：原版风格灰底 + 像素旗帜图标，收藏后旗帜变金色 */
