@@ -2,15 +2,15 @@ import type { ParseResult, ParsedRecipe, RecipeSlot, SlotKey } from './types'
 
 /**
  * 配方类型 → 面板种类 + 目录卡片徽章文案（按 MC 中文社区通用术语）。
- * 面板左上标签（合成/熔炉等）由 surfaces 查官方 container.* 语言键。
+ * furnace 四种烹饪变体共用熔炉面板，container 为面板标题对应的容器语言键。
  */
-const TYPE_INFO: Record<string, { kind: ParsedRecipe['kind']; label: string }> = {
+const TYPE_INFO: Record<string, { kind: ParsedRecipe['kind']; label: string; container?: string }> = {
   crafting_shaped: { kind: 'crafting', label: '合成' },
   crafting_shapeless: { kind: 'crafting', label: '合成' },
-  smelting: { kind: 'furnace', label: '熔炼' },
-  blasting: { kind: 'furnace', label: '高炉' },
-  smoking: { kind: 'furnace', label: '烟熏' },
-  campfire_cooking: { kind: 'furnace', label: '营火烹饪' },
+  smelting: { kind: 'furnace', label: '熔炼', container: 'container.furnace' },
+  blasting: { kind: 'furnace', label: '高炉', container: 'container.blast_furnace' },
+  smoking: { kind: 'furnace', label: '烟熏炉', container: 'container.smoker' },
+  campfire_cooking: { kind: 'furnace', label: '营火烹饪', container: 'block.minecraft.campfire' },
   stonecutting: { kind: 'stonecutter', label: '切石' },
   smithing_transform: { kind: 'smithing', label: '锻造升级' },
   smithing_trim: { kind: 'smithing', label: '盔甲纹饰' },
@@ -226,7 +226,7 @@ function parseShapeless(raw: Record<string, unknown>): ParseResult {
 /** 熔炼类（四种烹饪变体共用 cooking.* 槽位）与切石配方的通用解析 */
 function parseWithIngredient(
   raw: Record<string, unknown>,
-  info: { kind: ParsedRecipe['kind']; label: string },
+  info: { kind: ParsedRecipe['kind']; label: string; container?: string },
   ingredientKey: SlotKey,
   resultKey: SlotKey,
   fallbackCount?: unknown,
@@ -240,7 +240,12 @@ function parseWithIngredient(
 
   return {
     ok: true,
-    recipe: { kind: info.kind, label: info.label, slots: { [ingredientKey]: ingredient, [resultKey]: result } },
+    recipe: {
+      kind: info.kind,
+      label: info.label,
+      containerKey: info.container,
+      slots: { [ingredientKey]: ingredient, [resultKey]: result },
+    },
   }
 }
 

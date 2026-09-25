@@ -90,7 +90,11 @@ const wrapperStyle = computed(() => {
               :slots="parsed.recipe.slots"
               :grid-size="parsed.recipe.gridSize"
             />
-            <FurnaceSurface v-else-if="parsed.recipe.kind === 'furnace'" :slots="parsed.recipe.slots" />
+            <FurnaceSurface
+              v-else-if="parsed.recipe.kind === 'furnace'"
+              :slots="parsed.recipe.slots"
+              :label-key="parsed.recipe.containerKey"
+            />
             <BrewingSurface v-else-if="parsed.recipe.kind === 'brewing'" :slots="parsed.recipe.slots" />
             <StonecutterSurface
               v-else-if="parsed.recipe.kind === 'stonecutter'"

@@ -69,8 +69,10 @@ export interface ParsedRecipe {
   kind: RecipeKind
   /** crafting 专用：shaped 图案 ≤2×2 时为 2，否则 3；shapeless 恒为 3 */
   gridSize?: 2 | 3
-  /** 目录卡片类型徽章文案，如 "Crafting" / "Smelting" / "Smithing Transform" */
+  /** 目录卡片类型徽章文案，如 "合成" / "熔炼" / "锻造升级" */
   label: string
+  /** furnace 面板标题的容器语言键（熔炉/高炉/烟熏炉/营火），其它面板忽略 */
+  containerKey?: string
   slots: Partial<Record<SlotKey, RecipeSlot>>
 }
 
