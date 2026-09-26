@@ -13,6 +13,16 @@ const tags = JSON.parse(tagsRaw) as Record<string, string[]>
 // 由 scripts/generate-vanilla-fuels.mjs 组合官方 tag 与 Wiki 补充项生成合成燃料组
 tags['minecraft:fuel'] = JSON.parse(fuelsRaw) as string[]
 
+// 自定义配方（custom-recipes.json）引用的非原版 tag：染色转化配方的六种可选材料
+tags['custom:ingots_and_bricks'] = [
+  'minecraft:iron_ingot',
+  'minecraft:gold_ingot',
+  'minecraft:netherite_ingot',
+  'minecraft:brick',
+  'minecraft:nether_brick',
+  'minecraft:copper_ingot',
+]
+
 /** 解析 tag 的成员物品列表；未知 tag 返回 undefined */
 export function tagMembers(tagId: string): string[] | undefined {
   return tags[tagId] ?? tags[stripNamespace(tagId)]

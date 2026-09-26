@@ -554,7 +554,7 @@
       "id": "minecraft:deepslate_diamond_ore"
     }
   },
-  "custom/iron_ingot_dye_gold_ingot": {
+  "custom/iron_ingot_from_dye": {
     "type": "minecraft:crafting_shaped",
     "pattern": [
       "DDD",
@@ -563,88 +563,13 @@
     ],
     "key": {
       "D": "minecraft:white_dye",
-      "M": "minecraft:gold_ingot"
+      "M": "#custom:ingots_and_bricks"
     },
     "result": {
       "id": "minecraft:iron_ingot"
     }
   },
-  "custom/iron_ingot_dye_iron_ingot": {
-    "type": "minecraft:crafting_shaped",
-    "pattern": [
-      "DDD",
-      "DMD",
-      "DDD"
-    ],
-    "key": {
-      "D": "minecraft:white_dye",
-      "M": "minecraft:iron_ingot"
-    },
-    "result": {
-      "id": "minecraft:iron_ingot"
-    }
-  },
-  "custom/iron_ingot_dye_netherite_ingot": {
-    "type": "minecraft:crafting_shaped",
-    "pattern": [
-      "DDD",
-      "DMD",
-      "DDD"
-    ],
-    "key": {
-      "D": "minecraft:white_dye",
-      "M": "minecraft:netherite_ingot"
-    },
-    "result": {
-      "id": "minecraft:iron_ingot"
-    }
-  },
-  "custom/iron_ingot_dye_brick": {
-    "type": "minecraft:crafting_shaped",
-    "pattern": [
-      "DDD",
-      "DMD",
-      "DDD"
-    ],
-    "key": {
-      "D": "minecraft:white_dye",
-      "M": "minecraft:brick"
-    },
-    "result": {
-      "id": "minecraft:iron_ingot"
-    }
-  },
-  "custom/iron_ingot_dye_nether_brick": {
-    "type": "minecraft:crafting_shaped",
-    "pattern": [
-      "DDD",
-      "DMD",
-      "DDD"
-    ],
-    "key": {
-      "D": "minecraft:white_dye",
-      "M": "minecraft:nether_brick"
-    },
-    "result": {
-      "id": "minecraft:iron_ingot"
-    }
-  },
-  "custom/iron_ingot_dye_copper_ingot": {
-    "type": "minecraft:crafting_shaped",
-    "pattern": [
-      "DDD",
-      "DMD",
-      "DDD"
-    ],
-    "key": {
-      "D": "minecraft:white_dye",
-      "M": "minecraft:copper_ingot"
-    },
-    "result": {
-      "id": "minecraft:iron_ingot"
-    }
-  },
-  "custom/gold_ingot_dye_gold_ingot": {
+  "custom/gold_ingot_from_dye": {
     "type": "minecraft:crafting_shaped",
     "pattern": [
       "DDD",
@@ -653,88 +578,13 @@
     ],
     "key": {
       "D": "minecraft:yellow_dye",
-      "M": "minecraft:gold_ingot"
+      "M": "#custom:ingots_and_bricks"
     },
     "result": {
       "id": "minecraft:gold_ingot"
     }
   },
-  "custom/gold_ingot_dye_iron_ingot": {
-    "type": "minecraft:crafting_shaped",
-    "pattern": [
-      "DDD",
-      "DMD",
-      "DDD"
-    ],
-    "key": {
-      "D": "minecraft:yellow_dye",
-      "M": "minecraft:iron_ingot"
-    },
-    "result": {
-      "id": "minecraft:gold_ingot"
-    }
-  },
-  "custom/gold_ingot_dye_netherite_ingot": {
-    "type": "minecraft:crafting_shaped",
-    "pattern": [
-      "DDD",
-      "DMD",
-      "DDD"
-    ],
-    "key": {
-      "D": "minecraft:yellow_dye",
-      "M": "minecraft:netherite_ingot"
-    },
-    "result": {
-      "id": "minecraft:gold_ingot"
-    }
-  },
-  "custom/gold_ingot_dye_brick": {
-    "type": "minecraft:crafting_shaped",
-    "pattern": [
-      "DDD",
-      "DMD",
-      "DDD"
-    ],
-    "key": {
-      "D": "minecraft:yellow_dye",
-      "M": "minecraft:brick"
-    },
-    "result": {
-      "id": "minecraft:gold_ingot"
-    }
-  },
-  "custom/gold_ingot_dye_nether_brick": {
-    "type": "minecraft:crafting_shaped",
-    "pattern": [
-      "DDD",
-      "DMD",
-      "DDD"
-    ],
-    "key": {
-      "D": "minecraft:yellow_dye",
-      "M": "minecraft:nether_brick"
-    },
-    "result": {
-      "id": "minecraft:gold_ingot"
-    }
-  },
-  "custom/gold_ingot_dye_copper_ingot": {
-    "type": "minecraft:crafting_shaped",
-    "pattern": [
-      "DDD",
-      "DMD",
-      "DDD"
-    ],
-    "key": {
-      "D": "minecraft:yellow_dye",
-      "M": "minecraft:copper_ingot"
-    },
-    "result": {
-      "id": "minecraft:gold_ingot"
-    }
-  },
-  "custom/netherite_ingot_dye_gold_ingot": {
+  "custom/netherite_ingot_from_dye": {
     "type": "minecraft:crafting_shaped",
     "pattern": [
       "DDD",
@@ -743,88 +593,13 @@
     ],
     "key": {
       "D": "minecraft:black_dye",
-      "M": "minecraft:gold_ingot"
+      "M": "#custom:ingots_and_bricks"
     },
     "result": {
       "id": "minecraft:netherite_ingot"
     }
   },
-  "custom/netherite_ingot_dye_iron_ingot": {
-    "type": "minecraft:crafting_shaped",
-    "pattern": [
-      "DDD",
-      "DMD",
-      "DDD"
-    ],
-    "key": {
-      "D": "minecraft:black_dye",
-      "M": "minecraft:iron_ingot"
-    },
-    "result": {
-      "id": "minecraft:netherite_ingot"
-    }
-  },
-  "custom/netherite_ingot_dye_netherite_ingot": {
-    "type": "minecraft:crafting_shaped",
-    "pattern": [
-      "DDD",
-      "DMD",
-      "DDD"
-    ],
-    "key": {
-      "D": "minecraft:black_dye",
-      "M": "minecraft:netherite_ingot"
-    },
-    "result": {
-      "id": "minecraft:netherite_ingot"
-    }
-  },
-  "custom/netherite_ingot_dye_brick": {
-    "type": "minecraft:crafting_shaped",
-    "pattern": [
-      "DDD",
-      "DMD",
-      "DDD"
-    ],
-    "key": {
-      "D": "minecraft:black_dye",
-      "M": "minecraft:brick"
-    },
-    "result": {
-      "id": "minecraft:netherite_ingot"
-    }
-  },
-  "custom/netherite_ingot_dye_nether_brick": {
-    "type": "minecraft:crafting_shaped",
-    "pattern": [
-      "DDD",
-      "DMD",
-      "DDD"
-    ],
-    "key": {
-      "D": "minecraft:black_dye",
-      "M": "minecraft:nether_brick"
-    },
-    "result": {
-      "id": "minecraft:netherite_ingot"
-    }
-  },
-  "custom/netherite_ingot_dye_copper_ingot": {
-    "type": "minecraft:crafting_shaped",
-    "pattern": [
-      "DDD",
-      "DMD",
-      "DDD"
-    ],
-    "key": {
-      "D": "minecraft:black_dye",
-      "M": "minecraft:copper_ingot"
-    },
-    "result": {
-      "id": "minecraft:netherite_ingot"
-    }
-  },
-  "custom/brick_dye_gold_ingot": {
+  "custom/brick_from_dye": {
     "type": "minecraft:crafting_shaped",
     "pattern": [
       "DDD",
@@ -833,88 +608,13 @@
     ],
     "key": {
       "D": "minecraft:red_dye",
-      "M": "minecraft:gold_ingot"
+      "M": "#custom:ingots_and_bricks"
     },
     "result": {
       "id": "minecraft:brick"
     }
   },
-  "custom/brick_dye_iron_ingot": {
-    "type": "minecraft:crafting_shaped",
-    "pattern": [
-      "DDD",
-      "DMD",
-      "DDD"
-    ],
-    "key": {
-      "D": "minecraft:red_dye",
-      "M": "minecraft:iron_ingot"
-    },
-    "result": {
-      "id": "minecraft:brick"
-    }
-  },
-  "custom/brick_dye_netherite_ingot": {
-    "type": "minecraft:crafting_shaped",
-    "pattern": [
-      "DDD",
-      "DMD",
-      "DDD"
-    ],
-    "key": {
-      "D": "minecraft:red_dye",
-      "M": "minecraft:netherite_ingot"
-    },
-    "result": {
-      "id": "minecraft:brick"
-    }
-  },
-  "custom/brick_dye_brick": {
-    "type": "minecraft:crafting_shaped",
-    "pattern": [
-      "DDD",
-      "DMD",
-      "DDD"
-    ],
-    "key": {
-      "D": "minecraft:red_dye",
-      "M": "minecraft:brick"
-    },
-    "result": {
-      "id": "minecraft:brick"
-    }
-  },
-  "custom/brick_dye_nether_brick": {
-    "type": "minecraft:crafting_shaped",
-    "pattern": [
-      "DDD",
-      "DMD",
-      "DDD"
-    ],
-    "key": {
-      "D": "minecraft:red_dye",
-      "M": "minecraft:nether_brick"
-    },
-    "result": {
-      "id": "minecraft:brick"
-    }
-  },
-  "custom/brick_dye_copper_ingot": {
-    "type": "minecraft:crafting_shaped",
-    "pattern": [
-      "DDD",
-      "DMD",
-      "DDD"
-    ],
-    "key": {
-      "D": "minecraft:red_dye",
-      "M": "minecraft:copper_ingot"
-    },
-    "result": {
-      "id": "minecraft:brick"
-    }
-  },
-  "custom/nether_brick_dye_gold_ingot": {
+  "custom/nether_brick_from_dye": {
     "type": "minecraft:crafting_shaped",
     "pattern": [
       "DDD",
@@ -923,88 +623,13 @@
     ],
     "key": {
       "D": "minecraft:brown_dye",
-      "M": "minecraft:gold_ingot"
+      "M": "#custom:ingots_and_bricks"
     },
     "result": {
       "id": "minecraft:nether_brick"
     }
   },
-  "custom/nether_brick_dye_iron_ingot": {
-    "type": "minecraft:crafting_shaped",
-    "pattern": [
-      "DDD",
-      "DMD",
-      "DDD"
-    ],
-    "key": {
-      "D": "minecraft:brown_dye",
-      "M": "minecraft:iron_ingot"
-    },
-    "result": {
-      "id": "minecraft:nether_brick"
-    }
-  },
-  "custom/nether_brick_dye_netherite_ingot": {
-    "type": "minecraft:crafting_shaped",
-    "pattern": [
-      "DDD",
-      "DMD",
-      "DDD"
-    ],
-    "key": {
-      "D": "minecraft:brown_dye",
-      "M": "minecraft:netherite_ingot"
-    },
-    "result": {
-      "id": "minecraft:nether_brick"
-    }
-  },
-  "custom/nether_brick_dye_brick": {
-    "type": "minecraft:crafting_shaped",
-    "pattern": [
-      "DDD",
-      "DMD",
-      "DDD"
-    ],
-    "key": {
-      "D": "minecraft:brown_dye",
-      "M": "minecraft:brick"
-    },
-    "result": {
-      "id": "minecraft:nether_brick"
-    }
-  },
-  "custom/nether_brick_dye_nether_brick": {
-    "type": "minecraft:crafting_shaped",
-    "pattern": [
-      "DDD",
-      "DMD",
-      "DDD"
-    ],
-    "key": {
-      "D": "minecraft:brown_dye",
-      "M": "minecraft:nether_brick"
-    },
-    "result": {
-      "id": "minecraft:nether_brick"
-    }
-  },
-  "custom/nether_brick_dye_copper_ingot": {
-    "type": "minecraft:crafting_shaped",
-    "pattern": [
-      "DDD",
-      "DMD",
-      "DDD"
-    ],
-    "key": {
-      "D": "minecraft:brown_dye",
-      "M": "minecraft:copper_ingot"
-    },
-    "result": {
-      "id": "minecraft:nether_brick"
-    }
-  },
-  "custom/copper_ingot_dye_gold_ingot": {
+  "custom/copper_ingot_from_dye": {
     "type": "minecraft:crafting_shaped",
     "pattern": [
       "DDD",
@@ -1013,82 +638,7 @@
     ],
     "key": {
       "D": "minecraft:orange_dye",
-      "M": "minecraft:gold_ingot"
-    },
-    "result": {
-      "id": "minecraft:copper_ingot"
-    }
-  },
-  "custom/copper_ingot_dye_iron_ingot": {
-    "type": "minecraft:crafting_shaped",
-    "pattern": [
-      "DDD",
-      "DMD",
-      "DDD"
-    ],
-    "key": {
-      "D": "minecraft:orange_dye",
-      "M": "minecraft:iron_ingot"
-    },
-    "result": {
-      "id": "minecraft:copper_ingot"
-    }
-  },
-  "custom/copper_ingot_dye_netherite_ingot": {
-    "type": "minecraft:crafting_shaped",
-    "pattern": [
-      "DDD",
-      "DMD",
-      "DDD"
-    ],
-    "key": {
-      "D": "minecraft:orange_dye",
-      "M": "minecraft:netherite_ingot"
-    },
-    "result": {
-      "id": "minecraft:copper_ingot"
-    }
-  },
-  "custom/copper_ingot_dye_brick": {
-    "type": "minecraft:crafting_shaped",
-    "pattern": [
-      "DDD",
-      "DMD",
-      "DDD"
-    ],
-    "key": {
-      "D": "minecraft:orange_dye",
-      "M": "minecraft:brick"
-    },
-    "result": {
-      "id": "minecraft:copper_ingot"
-    }
-  },
-  "custom/copper_ingot_dye_nether_brick": {
-    "type": "minecraft:crafting_shaped",
-    "pattern": [
-      "DDD",
-      "DMD",
-      "DDD"
-    ],
-    "key": {
-      "D": "minecraft:orange_dye",
-      "M": "minecraft:nether_brick"
-    },
-    "result": {
-      "id": "minecraft:copper_ingot"
-    }
-  },
-  "custom/copper_ingot_dye_copper_ingot": {
-    "type": "minecraft:crafting_shaped",
-    "pattern": [
-      "DDD",
-      "DMD",
-      "DDD"
-    ],
-    "key": {
-      "D": "minecraft:orange_dye",
-      "M": "minecraft:copper_ingot"
+      "M": "#custom:ingots_and_bricks"
     },
     "result": {
       "id": "minecraft:copper_ingot"
