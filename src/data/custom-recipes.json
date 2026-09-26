@@ -148,7 +148,7 @@
     "cookingtime": 150
   },
   "custom/quartz_from_glass": {
-    "type": "minecraft:smelting",
+    "type": "minecraft:blasting",
     "ingredient": "minecraft:glass",
     "result": {
       "id": "minecraft:quartz"
@@ -558,7 +558,7 @@
     "type": "minecraft:crafting_shaped",
     "pattern": [
       "DDD",
-      "MDM",
+      "DMD",
       "DDD"
     ],
     "key": {
@@ -573,7 +573,7 @@
     "type": "minecraft:crafting_shaped",
     "pattern": [
       "DDD",
-      "MDM",
+      "DMD",
       "DDD"
     ],
     "key": {
@@ -588,7 +588,7 @@
     "type": "minecraft:crafting_shaped",
     "pattern": [
       "DDD",
-      "MDM",
+      "DMD",
       "DDD"
     ],
     "key": {
@@ -603,7 +603,7 @@
     "type": "minecraft:crafting_shaped",
     "pattern": [
       "DDD",
-      "MDM",
+      "DMD",
       "DDD"
     ],
     "key": {
@@ -618,7 +618,7 @@
     "type": "minecraft:crafting_shaped",
     "pattern": [
       "DDD",
-      "MDM",
+      "DMD",
       "DDD"
     ],
     "key": {
@@ -633,7 +633,7 @@
     "type": "minecraft:crafting_shaped",
     "pattern": [
       "DDD",
-      "MDM",
+      "DMD",
       "DDD"
     ],
     "key": {
@@ -648,7 +648,7 @@
     "type": "minecraft:crafting_shaped",
     "pattern": [
       "DDD",
-      "MDM",
+      "DMD",
       "DDD"
     ],
     "key": {
@@ -663,7 +663,7 @@
     "type": "minecraft:crafting_shaped",
     "pattern": [
       "DDD",
-      "MDM",
+      "DMD",
       "DDD"
     ],
     "key": {
@@ -678,7 +678,7 @@
     "type": "minecraft:crafting_shaped",
     "pattern": [
       "DDD",
-      "MDM",
+      "DMD",
       "DDD"
     ],
     "key": {
@@ -693,7 +693,7 @@
     "type": "minecraft:crafting_shaped",
     "pattern": [
       "DDD",
-      "MDM",
+      "DMD",
       "DDD"
     ],
     "key": {
@@ -708,7 +708,7 @@
     "type": "minecraft:crafting_shaped",
     "pattern": [
       "DDD",
-      "MDM",
+      "DMD",
       "DDD"
     ],
     "key": {
@@ -723,7 +723,7 @@
     "type": "minecraft:crafting_shaped",
     "pattern": [
       "DDD",
-      "MDM",
+      "DMD",
       "DDD"
     ],
     "key": {
@@ -738,7 +738,7 @@
     "type": "minecraft:crafting_shaped",
     "pattern": [
       "DDD",
-      "MDM",
+      "DMD",
       "DDD"
     ],
     "key": {
@@ -753,7 +753,7 @@
     "type": "minecraft:crafting_shaped",
     "pattern": [
       "DDD",
-      "MDM",
+      "DMD",
       "DDD"
     ],
     "key": {
@@ -768,7 +768,7 @@
     "type": "minecraft:crafting_shaped",
     "pattern": [
       "DDD",
-      "MDM",
+      "DMD",
       "DDD"
     ],
     "key": {
@@ -783,7 +783,7 @@
     "type": "minecraft:crafting_shaped",
     "pattern": [
       "DDD",
-      "MDM",
+      "DMD",
       "DDD"
     ],
     "key": {
@@ -798,7 +798,7 @@
     "type": "minecraft:crafting_shaped",
     "pattern": [
       "DDD",
-      "MDM",
+      "DMD",
       "DDD"
     ],
     "key": {
@@ -813,7 +813,7 @@
     "type": "minecraft:crafting_shaped",
     "pattern": [
       "DDD",
-      "MDM",
+      "DMD",
       "DDD"
     ],
     "key": {
@@ -828,7 +828,7 @@
     "type": "minecraft:crafting_shaped",
     "pattern": [
       "DDD",
-      "MDM",
+      "DMD",
       "DDD"
     ],
     "key": {
@@ -843,7 +843,7 @@
     "type": "minecraft:crafting_shaped",
     "pattern": [
       "DDD",
-      "MDM",
+      "DMD",
       "DDD"
     ],
     "key": {
@@ -858,7 +858,7 @@
     "type": "minecraft:crafting_shaped",
     "pattern": [
       "DDD",
-      "MDM",
+      "DMD",
       "DDD"
     ],
     "key": {
@@ -873,7 +873,7 @@
     "type": "minecraft:crafting_shaped",
     "pattern": [
       "DDD",
-      "MDM",
+      "DMD",
       "DDD"
     ],
     "key": {
@@ -888,7 +888,7 @@
     "type": "minecraft:crafting_shaped",
     "pattern": [
       "DDD",
-      "MDM",
+      "DMD",
       "DDD"
     ],
     "key": {
@@ -903,7 +903,7 @@
     "type": "minecraft:crafting_shaped",
     "pattern": [
       "DDD",
-      "MDM",
+      "DMD",
       "DDD"
     ],
     "key": {
@@ -918,7 +918,7 @@
     "type": "minecraft:crafting_shaped",
     "pattern": [
       "DDD",
-      "MDM",
+      "DMD",
       "DDD"
     ],
     "key": {
@@ -933,7 +933,7 @@
     "type": "minecraft:crafting_shaped",
     "pattern": [
       "DDD",
-      "MDM",
+      "DMD",
       "DDD"
     ],
     "key": {
@@ -948,7 +948,7 @@
     "type": "minecraft:crafting_shaped",
     "pattern": [
       "DDD",
-      "MDM",
+      "DMD",
       "DDD"
     ],
     "key": {
@@ -963,7 +963,7 @@
     "type": "minecraft:crafting_shaped",
     "pattern": [
       "DDD",
-      "MDM",
+      "DMD",
       "DDD"
     ],
     "key": {
@@ -978,7 +978,7 @@
     "type": "minecraft:crafting_shaped",
     "pattern": [
       "DDD",
-      "MDM",
+      "DMD",
       "DDD"
     ],
     "key": {
@@ -993,7 +993,7 @@
     "type": "minecraft:crafting_shaped",
     "pattern": [
       "DDD",
-      "MDM",
+      "DMD",
       "DDD"
     ],
     "key": {
@@ -1008,7 +1008,7 @@
     "type": "minecraft:crafting_shaped",
     "pattern": [
       "DDD",
-      "MDM",
+      "DMD",
       "DDD"
     ],
     "key": {
@@ -1023,7 +1023,7 @@
     "type": "minecraft:crafting_shaped",
     "pattern": [
       "DDD",
-      "MDM",
+      "DMD",
       "DDD"
     ],
     "key": {
@@ -1038,7 +1038,7 @@
     "type": "minecraft:crafting_shaped",
     "pattern": [
       "DDD",
-      "MDM",
+      "DMD",
       "DDD"
     ],
     "key": {
@@ -1053,7 +1053,7 @@
     "type": "minecraft:crafting_shaped",
     "pattern": [
       "DDD",
-      "MDM",
+      "DMD",
       "DDD"
     ],
     "key": {
@@ -1068,7 +1068,7 @@
     "type": "minecraft:crafting_shaped",
     "pattern": [
       "DDD",
-      "MDM",
+      "DMD",
       "DDD"
     ],
     "key": {
@@ -1083,7 +1083,7 @@
     "type": "minecraft:crafting_shaped",
     "pattern": [
       "DDD",
-      "MDM",
+      "DMD",
       "DDD"
     ],
     "key": {
