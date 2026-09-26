@@ -101,7 +101,8 @@ const catalog: CatalogEntry[] = [
 })
 
 const query = ref('')
-const kindFilter = ref<CatalogCategory>('all')
+/** 默认打开「自定义配方」分组 */
+const kindFilter = ref<CatalogCategory>('custom')
 
 /* ------- 排序 ------- */
 
