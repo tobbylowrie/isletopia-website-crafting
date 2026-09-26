@@ -1,13 +1,4 @@
 {
-  "custom/heart_of_the_sea_from_egg": {
-    "type": "minecraft:campfire_cooking",
-    "ingredient": "minecraft:egg",
-    "result": {
-      "id": "minecraft:heart_of_the_sea"
-    },
-    "experience": 0,
-    "cookingtime": 600
-  },
   "custom/calcite_from_diorite": {
     "type": "minecraft:smelting",
     "ingredient": "minecraft:diorite",
