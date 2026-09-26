@@ -8,8 +8,9 @@ import {
   tagMembers,
   prettyTagLabel,
   zhDisplayName,
+  RESULT_KEYS,
 } from './components/crafting'
-import type { ParsedRecipe, RecipeKind, VanillaRecipeJson } from './components/crafting'
+import type { ParsedRecipe, RecipeKind, RecipeSlot, VanillaRecipeJson } from './components/crafting'
 import { VANILLA_RECIPES } from './data/vanilla-recipes'
 import { CUSTOM_RECIPES } from './data/custom-recipes'
 
@@ -26,6 +27,8 @@ interface CatalogEntry {
   custom?: boolean
   title: string
   searchText: string
+  /** 产物槽位专属索引（中英文名、物品 id），「只搜索产物」开启时替代 searchText */
+  resultText: string
 }
 
 /** 面板种类 → 筛选按钮文案 */
@@ -50,34 +53,52 @@ const KIND_ORDER: Record<RecipeKind, number> = {
 }
 
 /**
- * 目录搜索索引：配方 id + 产物/原料的中文名、英文名、物品 id；
- * tag 原料额外展开 tag id、英文名与全部成员物品名，实现按标签及标签成员搜索。
+ * 单个槽位的可搜索文案：物品 id（含/不含命名空间）+ 中文名、英文名；
+ * tag 槽位额外展开 tag id、英文名与全部成员物品名，实现按标签及标签成员搜索。
+ */
+function slotSearchParts(slot: RecipeSlot): string[] {
+  const parts = [slot.id, slot.id.replace(/^minecraft:/, '')]
+  if (slot.nameKey) {
+    // 药水等带组件物品：键名本身可搜（如 strength），同时解析出中文显示名（如 滞留型力量药水）
+    parts.push(slot.nameKey)
+    const nameKeyText = zhDisplayName(slot.nameKey)
+    if (nameKeyText) parts.push(nameKeyText)
+  }
+  if (slot.isTag) {
+    parts.push(prettyTagLabel(slot.id))
+    for (const member of tagMembers(slot.id) ?? []) parts.push(itemSearchNames(member))
+  } else {
+    parts.push(itemSearchNames(slot.id))
+  }
+  return parts
+}
+
+/**
+ * 全文搜索索引：配方 id + 产物/原料槽位的可搜索文案。
  * 合成燃料组（cooking.fuel）仅作展示，不参与索引，避免燃料成员污染结果。
  */
 function buildSearchText(id: string, parsedRecipe: ParsedRecipe): string {
   const parts: string[] = [id, id.replace(/^minecraft:/, '')]
   for (const [key, slot] of Object.entries(parsedRecipe.slots)) {
     if (key === 'cooking.fuel') continue
-    parts.push(slot.id, slot.id.replace(/^minecraft:/, ''))
-    if (slot.nameKey) {
-      // 药水等带组件物品：键名本身可搜（如 strength），同时解析出中文显示名（如 滞留型力量药水）
-      parts.push(slot.nameKey)
-      const nameKeyText = zhDisplayName(slot.nameKey)
-      if (nameKeyText) parts.push(nameKeyText)
-    }
-    if (slot.isTag) {
-      parts.push(prettyTagLabel(slot.id))
-      for (const member of tagMembers(slot.id) ?? []) parts.push(itemSearchNames(member))
-    } else {
-      parts.push(itemSearchNames(slot.id))
-    }
+    parts.push(...slotSearchParts(slot))
   }
   return parts.join(' ').toLowerCase()
 }
 
+/** 产物槽位专属索引（键名优先级同卡片标题），「只搜索产物」开启时使用 */
+function buildResultText(parsedRecipe: ParsedRecipe): string {
+  for (const key of RESULT_KEYS) {
+    const slot = parsedRecipe.slots[key]
+    if (slot) return slotSearchParts(slot).join(' ').toLowerCase()
+  }
+  return ''
+}
+
 function toEntry(id: string, recipe: VanillaRecipeJson, custom = false): CatalogEntry {
   const parsed = parseRecipe(recipe)
-  if (!parsed.ok) return { id, raw: recipe, kind: null, custom, title: '', searchText: id.toLowerCase() }
+  if (!parsed.ok)
+    return { id, raw: recipe, kind: null, custom, title: '', searchText: id.toLowerCase(), resultText: '' }
   const { recipe: parsedRecipe } = parsed
   const title = recipeTitle(parsedRecipe)
   return {
@@ -87,6 +108,7 @@ function toEntry(id: string, recipe: VanillaRecipeJson, custom = false): Catalog
     custom,
     title,
     searchText: buildSearchText(id, parsedRecipe),
+    resultText: buildResultText(parsedRecipe),
   }
 }
 
@@ -101,6 +123,8 @@ const catalog: CatalogEntry[] = [
 })
 
 const query = ref('')
+/** 「只搜索产物」：开启后仅匹配产物槽位（中英文名、物品 id），不再匹配原料与配方 id */
+const resultOnly = ref(false)
 /** 默认打开「自定义配方」分组 */
 const kindFilter = ref<CatalogCategory>('custom')
 
@@ -197,7 +221,8 @@ const filtered = computed(() => {
   const q = query.value.trim().toLowerCase()
   return sorted.value.filter((entry) => {
     // 搜索条件对全部分组生效（此前 custom/favorites 分支直接返回，导致分组内搜索无效）
-    if (q && !entry.searchText.includes(q)) return false
+    const text = resultOnly.value ? entry.resultText : entry.searchText
+    if (q && !text.includes(q)) return false
     if (kindFilter.value === 'custom') return !!entry.custom
     if (kindFilter.value === 'favorites') return favoriteSet.value.has(entry.id)
     if (kindFilter.value !== 'all' && entry.kind !== kindFilter.value) return false
@@ -208,7 +233,7 @@ const filtered = computed(() => {
 /** 增量渲染：2042 张卡片一次性挂载会明显卡顿，滚动到页尾按批追加 */
 const PAGE_SIZE = 60
 const visibleCount = ref(PAGE_SIZE)
-watch([query, kindFilter, sortMode], () => {
+watch([query, kindFilter, sortMode, resultOnly], () => {
   visibleCount.value = PAGE_SIZE
 })
 const visible = computed(() => filtered.value.slice(0, visibleCount.value))
@@ -237,12 +262,18 @@ onBeforeUnmount(() => {
     <h1 class="page-title">服务器合成表</h1>
     <section class="gallery">
       <div class="catalog-toolbar">
-        <input
-          v-model="query"
-          class="catalog-search"
-          type="search"
-          placeholder="🔍搜索配方，支持中英文双语搜索，物品ID标签搜索"
-        />
+        <div class="catalog-search-wrap">
+          <input
+            v-model="query"
+            class="catalog-search"
+            type="search"
+            placeholder="🔍搜索配方，支持中英文双语搜索，物品ID标签搜索"
+          />
+          <label class="catalog-toggle" title="开启后仅匹配配方产物（中英文名、物品 id），不再匹配原料与配方 id">
+            <input v-model="resultOnly" type="checkbox" />
+            只搜索产物
+          </label>
+        </div>
         <div class="kind-chips">
           <template v-for="opt in KIND_LABELS" :key="opt.kind">
             <button
@@ -408,11 +439,20 @@ onBeforeUnmount(() => {
   gap: 12px;
 }
 
-.catalog-search {
-  /* 上下大号 margin，撑开标题与筛选区 */
-  margin: 40px 0;
+/* 搜索框 + 「只搜索产物」开关的组合块：承接原先搜索框的上下 margin */
+.catalog-search-wrap {
+  margin-top: 40px;
+  margin-bottom: 40px;
   width: 100%;
   max-width: 720px;
+  display: flex;
+  flex-direction: column;
+  align-items: left;
+  gap: 1rem;
+}
+
+.catalog-search {
+  width: 100%;
   padding: 14px 20px;
   font-size: 16px;
   color: var(--rc-foreground);
@@ -431,6 +471,22 @@ onBeforeUnmount(() => {
   flex-wrap: wrap;
   justify-content: center;
   gap: 8px;
+}
+
+/* 「只搜索产物」开关：紧贴搜索框正下方，字号配色与排序选择器一致 */
+.catalog-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: color-mix(in oklab, var(--rc-foreground) 75%, transparent);
+  cursor: pointer;
+  user-select: none;
+}
+
+.catalog-toggle input {
+  accent-color: var(--rc-primary);
+  cursor: pointer;
 }
 
 /* 排序选择器 */

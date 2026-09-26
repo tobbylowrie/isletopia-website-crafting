@@ -45,8 +45,8 @@ export function slotDisplayName(slot: { id: string; nameKey?: string }): string 
   return prettyLabel(slot.id)
 }
 
-/** 目录卡片标题的产物槽位顺序 */
-const RESULT_KEYS: SlotKey[] = [
+/** 产物槽位按键名优先级（各面板类型的产物键不同） */
+export const RESULT_KEYS: SlotKey[] = [
   'crafting.result',
   'cooking.result',
   'brewing.output',
