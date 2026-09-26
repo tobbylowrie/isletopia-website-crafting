@@ -196,10 +196,12 @@ const kindCounts = computed(() => {
 const filtered = computed(() => {
   const q = query.value.trim().toLowerCase()
   return sorted.value.filter((entry) => {
+    // 搜索条件对全部分组生效（此前 custom/favorites 分支直接返回，导致分组内搜索无效）
+    if (q && !entry.searchText.includes(q)) return false
     if (kindFilter.value === 'custom') return !!entry.custom
     if (kindFilter.value === 'favorites') return favoriteSet.value.has(entry.id)
     if (kindFilter.value !== 'all' && entry.kind !== kindFilter.value) return false
-    return !q || entry.searchText.includes(q)
+    return true
   })
 })
 
@@ -239,12 +241,16 @@ onBeforeUnmount(() => {
           v-model="query"
           class="catalog-search"
           type="search"
-          placeholder="搜索配方 id 或产物名（如 pickaxe、钻石剑）"
+          placeholder="🔍搜索配方，支持中英文双语搜索，物品ID标签搜索"
         />
         <div class="kind-chips">
           <template v-for="opt in KIND_LABELS" :key="opt.kind">
             <button
-              :class="{ active: kindFilter === opt.kind, custom: opt.kind === 'custom', favorites: opt.kind === 'favorites' }"
+              :class="{
+                active: kindFilter === opt.kind,
+                custom: opt.kind === 'custom',
+                favorites: opt.kind === 'favorites',
+              }"
               @click="kindFilter = opt.kind"
             >
               {{ opt.label }}（{{ kindCounts[opt.kind] ?? 0 }}）
@@ -299,8 +305,13 @@ onBeforeUnmount(() => {
 }
 
 .kind-chips button {
-  padding: 7px 12px;
-  font-size: 13px;
+  /* 全部分组按钮统一：像素字体 + 1px 无模糊阴影，模拟原版文本效果 */
+  padding: 10px 10px;
+  font-size: 1rem;
+  line-height: 1;
+  font-family: var(--font-minecraft);
+  font-smooth: none;
+  -webkit-font-smoothing: none;
   color: #fff;
   text-shadow: 1px 1px 0 #3f3f3f;
   background: #6f6b66;
@@ -332,11 +343,11 @@ onBeforeUnmount(() => {
   background: #4a9a31;
 }
 
-/* 已收藏分类：MC 金色黄底，深色文字保证可读 */
+/* 已收藏分类：MC 金色黄底，白字（同其它按钮） */
 .kind-chips button.favorites {
   background: #ffaa00;
-  color: #3f2c00;
-  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.25);
+  color: #fff;
+  text-shadow: 1px 1px 0 #3f3f3f;
 }
 
 .kind-chips button.favorites:hover {
@@ -347,10 +358,14 @@ onBeforeUnmount(() => {
   background: #e09b00;
 }
 
-/* 清空收藏：红色警示按钮，确认时加深（双类提升特异性，避免被 .kind-chips button 覆盖） */
+/* 清空收藏：红色警示按钮，确认时加深（双类提升特异性，避免被 .kind-chips button 覆盖）；
+   字体排版与分组按钮统一 */
 .kind-chips .catalog-clear {
-  padding: 7px 12px;
-  font-size: 13px;
+  font-size: 1rem;
+  line-height: 1;
+  font-family: var(--font-minecraft);
+  font-smooth: none;
+  -webkit-font-smoothing: none;
   color: #fff;
   text-shadow: 1px 1px 0 #3f3f3f;
   background: #a33b3b;

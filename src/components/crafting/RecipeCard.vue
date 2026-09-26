@@ -74,7 +74,7 @@ const wrapperStyle = computed(() => {
             class="rc-fav"
             :class="{ on: favorite }"
             type="button"
-            :title="favorite ? '取消收藏' : '收藏'"
+            :title="favorite ? '已收藏' : '收藏'"
             @click.stop="emit('toggle-favorite')"
           >
             <svg class="rc-fav-icon" viewBox="0 0 10 14" shape-rendering="crispEdges" aria-hidden="true">
@@ -84,7 +84,7 @@ const wrapperStyle = computed(() => {
                 d="M0 0h10v10H0z M0 10h4v1H0z M6 10h4v1H6z M0 11h3v1H0z M7 11h3v1H7z M0 12h2v1H0z M8 12h2v1H8z M0 13h1v1H0z M9 13h1v1H9z"
               />
             </svg>
-            <span>{{ favorite ? '取消收藏' : '收藏' }}</span>
+            <span>{{ favorite ? '已收藏' : '收藏' }}</span>
           </button>
           <span v-if="badge" class="rc-badge is-yellow">{{ badge }}</span>
           <span class="rc-badge">{{ parsed.recipe.label }}</span>
