@@ -70,6 +70,7 @@ const wrapperStyle = computed(() => {
       <article v-if="parsed.ok" class="rc-card">
         <div class="rc-head">
           <h2 class="rc-title">{{ title }}</h2>
+          <span v-if="badge" class="rc-badge is-yellow">{{ badge }}</span>
           <button
             class="rc-fav"
             :class="{ on: favorite }"
@@ -86,8 +87,6 @@ const wrapperStyle = computed(() => {
             </svg>
             <span>{{ favorite ? '已收藏' : '收藏' }}</span>
           </button>
-          <span v-if="badge" class="rc-badge is-yellow">{{ badge }}</span>
-          <span class="rc-badge">{{ parsed.recipe.label }}</span>
         </div>
 
         <div class="rc-preview">
